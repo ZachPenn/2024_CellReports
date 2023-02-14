@@ -1,0 +1,19 @@
+Animal,DOB,Surgery date,Exclude,Histo,Notes,Region,OF1,EPM1,LD1,OF2,EPM2,LD2,TR1,TR2
+1,7/5/22,10/6/22,0,,,vHC,Sal,Sal,uPSEM,uPSEM,uPSEM,Sal,Sal,uPSEM
+2,7/5/22,10/6/22,1,Injection likely centered in adjacent cortex on one side,,vHC,uPSEM,Sal,uPSEM,Sal,uPSEM,Sal,uPSEM,Sal
+3,7/5/22,10/7/22,0,,Mouse briefly jumped onto wall during OF1,BLA,Sal,Sal,uPSEM,uPSEM,uPSEM,Sal,Sal,uPSEM
+4,7/5/22,10/7/22,1,No Expression,,BLA,uPSEM,Sal,uPSEM,Sal,uPSEM,Sal,uPSEM,Sal
+5,7/5/22,10/17/22,0,,Mouse jumped onto floor at very beginning of EPM1.  Putin at 40 instead of 30 sec.,vHC,uPSEM,uPSEM,Sal,Sal,Sal,uPSEM,uPSEM,Sal
+6,7/5/22,10/17/22,0,,,vHC,Sal,uPSEM,uPSEM,uPSEM,Sal,Sal,Sal,uPSEM
+7,7/5/22,10/17/22,0,,,BLA,uPSEM,uPSEM,uPSEM,Sal,Sal,Sal,uPSEM,Sal
+8,7/5/22,10/17/22,0,,,BLA,Sal,uPSEM,uPSEM,uPSEM,Sal,Sal,Sal,uPSEM
+9,7/5/22,10/18/22,0,,,vHC,uPSEM,Sal,Sal,Sal,uPSEM,uPSEM,uPSEM,Sal
+10,7/5/22,10/18/22,1,Unliateral,,vHC,Sal,Sal,Sal,uPSEM,uPSEM,uPSEM,Sal,uPSEM
+11,7/5/22,10/18/22,0,,,vHC,Sal,uPSEM,Sal,uPSEM,Sal,uPSEM,Sal,uPSEM
+12,7/5/22,10/18/22,0,,,BLA,uPSEM,Sal,Sal,Sal,uPSEM,uPSEM,uPSEM,Sal
+13,7/5/22,10/18/22,0,,,BLA,Sal,Sal,Sal,uPSEM,uPSEM,uPSEM,Sal,uPSEM
+14,7/5/22,10/20/22,0,,"Technician dropped in center of OF1, instead of on side",vHC,uPSEM,uPSEM,uPSEM,Sal,Sal,Sal,uPSEM,Sal
+15,7/5/22,10/20/22,0,,,vHC,uPSEM,uPSEM,Sal,Sal,Sal,uPSEM,uPSEM,Sal
+16,7/5/22,10/20/22,0,,,vHC,Sal,Sal,uPSEM,uPSEM,uPSEM,Sal,Sal,uPSEM
+17,7/5/22,10/20/22,0,,,BLA,Sal,uPSEM,Sal,uPSEM,Sal,uPSEM,Sal,uPSEM
+18,7/5/22,10/20/22,0,,,BLA,uPSEM,uPSEM,Sal,Sal,Sal,uPSEM,uPSEM,Sal

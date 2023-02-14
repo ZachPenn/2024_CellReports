@@ -1,0 +1,874 @@
+---
+title: "SEFL10K2_Analysis"
+author: "Zach"
+output:
+  html_document:
+    fig_height: 4.5
+    fig_width: 4.5
+    highlight: kate
+    number_sections: yes
+    theme: readable
+    toc: yes
+    toc_depth: 6
+  pdf_document:
+    toc: yes
+    toc_depth: '6'
+editor_options: 
+  chunk_output_type: console
+---
+
+
+# Set Global Options
+```{r global_options}
+knitr::opts_chunk$set(fig.width=4.5, fig.height=4.5, echo=TRUE, warning=FALSE,message=FALSE)
+```
+
+
+
+# Load Packages 
+```{r}
+library(ggplot2)
+library(ez)
+library(knitr)
+library(tidyr)
+library(dplyr)
+library(purrr)
+```
+
+
+
+# Import Data 
+```{r}
+
+#load  files
+data_vf = read.csv('SEFL10k2_vfdata.csv',header=TRUE)
+data_ld = read.csv('SEFL10k2_lddata.csv',header=TRUE)
+data_epm = read.csv('SEFL10k2_epmdata.csv',header=TRUE)
+data_of = read.csv('SEFL10k2_ofdata.csv',header=TRUE)
+groups = read.csv('SEFL10k2_groups.csv',header=TRUE)
+
+
+##get dataframe for drug order
+drug_order = pivot_longer(
+  data = groups[,c('Animal','OF1','OF2','EPM1','EPM2','LD1','LD2','TR1','TR2')],
+  cols = c('OF1','OF2','EPM1','EPM2','LD1','LD2','TR1','TR2'),
+  names_to = 'TestName',
+  values_to = 'Drug'
+)
+drug_order$testnum = sapply(drug_order$TestName, function (x) {l = nchar(x); return(as.numeric(substr(x,l,l)))})
+drug_order$test = sapply(drug_order$TestName,function (x) {l = nchar(x); return(substr(x,1,l-1))})
+
+
+#factorize as necessary
+groups$Animal = factor(groups$Animal)
+data_vf$Animal = factor(data_vf$Animal)
+data_ld$Animal = factor(data_ld$Animal)
+data_epm$Animal = factor(data_epm$Animal)
+data_of$Animal = factor(data_of$Animal)
+drug_order$Animal = factor(drug_order$Animal)
+
+ 
+#add group info to data files
+data_vf = inner_join(x=groups,y=data_vf,by="Animal")
+data_ld = inner_join(x=groups,y=data_ld,by="Animal")
+data_of = inner_join(x=groups,y=data_of,by="Animal")
+data_epm = inner_join(x=groups,y=data_epm,by="Animal")
+
+
+#add drug order 
+data_ld = left_join(x=data_ld, y=drug_order[drug_order$test=='LD',], by=c('Animal','testnum'))
+data_of = left_join(x=data_of, y=drug_order[drug_order$test=='OF',], by=c('Animal','testnum'))
+data_epm = left_join(x=data_epm, y=drug_order[drug_order$test=='EPM',], by=c('Animal','testnum'))
+
+```
+
+
+#Drop subjects
+See `groups` dataframe for exclusion rationale.
+```{r}
+data_vf = data_vf[data_vf$Exclude!=1,]
+data_ld = data_ld[data_ld$Exclude!=1,]
+data_of = data_of[data_of$Exclude!=1,]
+data_epm = data_epm[data_epm$Exclude!=1,]
+```
+
+
+# Subset data
+Separate phases (trauma, trauma recall, etc) are placed in unique dataframes for ease of analysis.
+```{r}
+
+#trauma data
+trauma = data_vf[data_vf$phase=='trauma',]
+
+
+#open field data collapsed
+of.collapsed = summarize_at(
+  .tbl = group_by(data_of, Animal, testnum, Drug, Region),
+  .funs = list('mean'=mean,'sum'=sum),
+  .vars = c('DstFrmCnt_in','Distance_in')
+)
+
+
+#epm data collapsed
+data_epm$closed = data_epm$closed1 + data_epm$closed2
+epm.collapsed = summarize_at(
+  .tbl = group_by(data_epm, Animal, testnum, Drug, Region),
+  .funs = list('mean'=mean,'sum'=sum),
+  .vars = c('closed','Distance_in')
+)
+
+
+#ld data collapsed
+ld.collapsed = summarize_at(
+  .tbl = group_by(data_ld, Animal, testnum, Drug, Region),
+  .funs = list('mean'=mean,'sum'=sum),
+  .vars = c('dark','Distance_in')
+)
+
+```
+
+
+
+# Get summary statistics for plotting
+Calculate relevant means and std. errors.
+```{r}
+
+#of stats
+of.stats = summarise_at(
+  .tbl = group_by(
+    .data = of.collapsed,
+    Region, Drug),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('Distance_in_sum','DstFrmCnt_in_mean'))
+
+
+#epm stats
+epm.stats = summarise_at(
+  .tbl = group_by(
+    .data = epm.collapsed,
+    Region, Drug),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('Distance_in_sum','closed_mean'))
+
+
+#ld stats
+ld.stats = summarise_at(
+  .tbl = group_by(
+    .data = ld.collapsed,
+    Region, Drug),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('Distance_in_sum','dark_mean'))
+
+
+```
+
+
+# Plots
+## Global Plot Parameters
+```{r}
+
+#set figure file prefix
+f_pfx = '10k2'
+
+#ggsave
+p.save = FALSE
+
+#Plot dimensions
+p.dim.width = 4.5 #Plot width (in)
+p.dim.height = 4.5 #Plot height (in)
+p.dim.dpi = 500 #Plot dpi
+
+#Plot text
+p.textsize.title = 20
+p.textsize.legend =10
+p.textsize.axis.title = 12
+p.textsize.axis.text = 10
+
+#Plot colors
+p.scale.colour = c("red","steelblue4")
+p.scale.fill = c("red","steelblue4")
+
+#Plot line dimensions
+p.line.data.size = 1
+p.line.axis.size = .5
+p.line.bar.size = .7
+p.line.error.size = .75
+
+#Widths
+p.width.bar = .7
+p.width.jitter = .3
+p.width.error = .5
+
+#Point/dot sizes
+p.point.shape = 21
+p.point.size = 4
+p.point.stroke = 1
+p.dot.size = 2.5
+p.dot.shape = 21
+p.dot.alpha = .25
+
+#base theme
+p.basetheme = theme_bw() + theme(
+    panel.grid = element_blank(), 
+    panel.border = element_rect(colour = "white"),
+    axis.line = element_line(color="black", size = p.line.axis.size),
+    plot.title = element_text(
+      size=p.textsize.title, 
+      hjust=.5, margin=margin(b=15,t=10), 
+      face="bold"),
+    axis.title = element_text(size=p.textsize.axis.title, face="bold"),
+    axis.text= element_text(size=p.textsize.axis.text,colour="black"),
+    axis.text.x= element_text(
+      size=p.textsize.axis.title,
+      face='bold',
+      angle = -90,
+      hjust = 0,
+      vjust=.5,
+      margin=margin(b=10,t=5)),
+    legend.position = c(.3,.85),
+    legend.title = element_blank(),
+    legend.text = element_text(size=p.textsize.legend, face="bold"),
+    legend.key = element_rect(colour=NA,fill=NA),
+    legend.background = element_rect(fill=NA),
+    plot.background = element_rect(fill = "transparent",colour = NA),
+    plot.margin=unit(c(1,3.25,.1,3.25), "cm") #(top,right,bottom,left)
+  ) 
+
+#predefine partial function for saving plots
+saveplot = partial(
+  ggsave,
+  width = p.dim.width,
+  height = p.dim.height,
+  units = "in",
+  dpi = p.dim.dpi,
+  bg = 'transparent'
+)
+```
+
+
+## Open field
+### Distance 
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.OF.dist = ggplot(
+  data = of.stats,
+  aes(x=Drug,
+      y=Distance_in_sum_mean,
+      fill=Region,
+      group=Region)) 
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 1800
+p.yint = 600
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot 
+P.OF.dist  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = Distance_in_sum_mean - Distance_in_sum_sem,
+        ymax = Distance_in_sum_mean + Distance_in_sum_sem,),
+    show.legend = FALSE) +
+  
+
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    shape = p.point.shape,
+    stroke = p.point.stroke,
+    show.legend = FALSE
+  ) +
+  
+  geom_line(
+    data = of.collapsed,
+    aes(
+      x = Drug,
+      y = Distance_in_sum,
+      group = Animal
+    ),
+    alpha=.5,
+    size = .25
+  ) +
+  
+  facet_grid(cols = vars(Region)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks, expand = c(0, 0)) +
+  
+  ggtitle("Open Field") + ylab("Distance Travelled (in)") + xlab("") +
+  p.basetheme +
+  theme(
+   axis.text.x = element_text(angle=-90, hjust=0)
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "OF_Dist.tiff", sep = '_'))}
+
+```
+
+### Center 
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.OF.cnt = ggplot(
+  data = of.stats,
+  aes(x=Drug,
+      y=DstFrmCnt_in_mean_mean,
+      fill=Region,
+      group=Region)) 
+
+#Define plot specific parameters
+p.ymin = 5
+p.ymax = 9
+p.yint = 1
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot 
+P.OF.cnt  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = DstFrmCnt_in_mean_mean - DstFrmCnt_in_mean_sem,
+        ymax = DstFrmCnt_in_mean_mean + DstFrmCnt_in_mean_sem),
+    show.legend = FALSE) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    shape = p.point.shape,
+    stroke = p.point.stroke,
+    show.legend = FALSE
+  ) +
+  
+  geom_line(
+    data = of.collapsed,
+    aes(
+      x = Drug,
+      y = DstFrmCnt_in_mean,
+      group = Animal
+    ),
+    alpha=.5,
+    size = .25
+  ) +
+  
+  facet_grid(cols = vars(Region)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks, expand = c(0, 0)) +
+  
+  ggtitle("Open Field") + ylab("Distance From Center (in)") + xlab("") +
+  p.basetheme +
+  theme(
+   axis.text.x = element_text(angle=-90, hjust=0)
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "OF_Cnt.tiff", sep = '_'))}
+
+```
+
+
+## EPM
+### Distance 
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.EPM.dist = ggplot(
+  data = epm.stats,
+  aes(x=Drug,
+      y=Distance_in_sum_mean,
+      fill=Region,
+      group=Region)) 
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 1200
+p.yint = 400
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot 
+P.EPM.dist  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = Distance_in_sum_mean - Distance_in_sum_sem,
+        ymax = Distance_in_sum_mean + Distance_in_sum_sem,),
+    show.legend = FALSE) +
+  
+  # geom_line(
+  #   stat="identity",
+  #   size = p.line.data.size,
+  # ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    shape = p.point.shape,
+    stroke = p.point.stroke,
+    show.legend = FALSE
+  ) +
+  
+  geom_line(
+    data = epm.collapsed,
+    aes(
+      x = Drug,
+      y = Distance_in_sum,
+      group = Animal
+    ),
+    alpha=.5,
+    size = .25
+  ) +
+  
+  facet_grid(cols = vars(Region)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks, expand = c(0, 0)) +
+  
+  ggtitle("EPM") + ylab("Distance Travelled (in)") + xlab("") +
+  p.basetheme +
+  theme(
+   axis.text.x = element_text(angle=-90, hjust=0)
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "EPM_Dist.tiff", sep = '_'))}
+
+```
+
+### Closed arms
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.EPM.cls = ggplot(
+  data = epm.stats,
+  aes(x=Drug,
+      y=closed_mean_mean,
+      fill=Region,
+      group=Region)) 
+
+#Define plot specific parameters
+p.ymin = .2
+p.ymax = 1
+p.yint = .2
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot 
+P.EPM.cls  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = closed_mean_mean - closed_mean_sem,
+        ymax = closed_mean_mean + closed_mean_sem,),
+    show.legend = FALSE) +
+  
+  # geom_line(
+  #   stat="identity",
+  #   size = p.line.data.size,
+  # ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    shape = p.point.shape,
+    stroke = p.point.stroke,
+    show.legend = FALSE
+  ) +
+  
+  geom_line(
+      data = epm.collapsed,
+      aes(
+        x = Drug,
+        y = closed_mean,
+        group = Animal
+      ),
+      alpha=.5,
+      size = .25
+  ) +
+  
+  geom_hline(yintercept = .5, linetype='dashed') +
+  
+  facet_grid(cols = vars(Region)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
+  
+  ggtitle("EPM") + ylab("% Time in Closed Arms") + xlab("") +
+  p.basetheme +
+  theme(
+   axis.text.x = element_text(angle=-90, hjust=0)
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "EPM_Cls.tiff", sep = '_'))}
+
+```
+
+
+
+## Light dark
+### Distance 
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.LD.dist = ggplot(
+  data = ld.stats,
+  aes(x=Drug,
+      y=Distance_in_sum_mean,
+      fill=Region,
+      group=Region)) 
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 1200
+p.yint = 400
+p.breaks = seq(p.ymin, p.ymax, p.yint)
+
+#Create plot 
+P.LD.dist  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = Distance_in_sum_mean - Distance_in_sum_sem,
+        ymax = Distance_in_sum_mean + Distance_in_sum_sem,),
+    show.legend = FALSE) +
+  
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    shape = p.point.shape,
+    stroke = p.point.stroke,
+    show.legend = FALSE
+  ) +
+  
+  geom_line(
+    data = ld.collapsed,
+    aes(
+      x = Drug,
+      y = Distance_in_sum,
+      group = Animal
+    ),
+    alpha=.5,
+    size = .25
+  ) +
+  
+  facet_grid(cols = vars(Region)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks, expand = c(0, 0)) +
+  
+  ggtitle("Light-Dark") + ylab("Distance Travelled (in)") + xlab("") +
+  p.basetheme +
+  theme(
+   axis.text.x = element_text(angle=-90, hjust=0)
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "LD_Dist.tiff", sep = '_'))}
+
+```
+
+### Dark side
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.LD.dark = ggplot(
+  data = ld.stats,
+  aes(x=Drug,
+      y=dark_mean_mean,
+      fill=Region,
+      group=Region)) 
+
+#Define plot specific parameters
+p.ymin = .2
+p.ymax = 1
+p.yint = .2
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot 
+P.LD.dark  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = dark_mean_mean - dark_mean_sem,
+        ymax = dark_mean_mean + dark_mean_sem,),
+    show.legend = FALSE) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    shape = p.point.shape,
+    stroke = p.point.stroke,
+    show.legend = FALSE
+  ) +
+  
+  geom_line(
+      data = ld.collapsed,
+      aes(
+        x = Drug,
+        y = dark_mean,
+        group = Animal
+      ),
+      alpha=.5,
+      size = .25
+  ) +
+  
+  geom_hline(yintercept = .5, linetype='dashed') +
+  
+  facet_grid(cols = vars(Region)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
+  
+  ggtitle("Light-Dark") + ylab("% Time on Dark Side") + xlab("") +
+  
+  p.basetheme +
+  theme(
+   axis.text.x = element_text(angle=-90, hjust=0)
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "LD_Dark.tiff", sep = '_'))}
+
+```
+
+
+
+
+
+# Statistics
+## Open field
+### Distance travelled
+```{r}
+
+of.dist.anova = ezANOVA(
+  data = of.collapsed,
+  dv = Distance_in_sum,
+  within = Drug,
+  wid = Animal,
+  between = Region,
+  type = 3,
+  white.adj = TRUE,
+  detailed = TRUE
+)
+of.dist.anova
+
+
+of.dist.vhc.anova = ezANOVA(
+  data = of.collapsed[of.collapsed$Region=='vHC',],
+  dv = Distance_in_sum,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE,
+  detailed = TRUE
+)
+of.dist.vhc.anova
+
+
+of.dist.bla.anova = ezANOVA(
+  data = of.collapsed[of.collapsed$Region=='BLA',],
+  dv = Distance_in_sum,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE,
+  detailed = TRUE
+)
+of.dist.bla.anova
+
+
+```
+
+### Distance from center
+```{r}
+
+of.cnt.anova = ezANOVA(
+  data = of.collapsed,
+  dv = DstFrmCnt_in_sum,
+  within = Drug,
+  wid = Animal,
+  between = Region,
+  type = 3,
+  white.adj = TRUE,
+  detailed = TRUE
+)
+of.cnt.anova
+
+```
+
+
+## LightDark
+### Distance travelled
+```{r}
+
+ld.dist.anova = ezANOVA(
+  data = ld.collapsed,
+  dv = Distance_in_sum,
+  within = Drug,
+  wid = Animal,
+  between = Region,
+  type = 3,
+  white.adj = TRUE
+)
+ld.dist.anova
+
+
+ld.dist.vhc.anova = ezANOVA(
+  data = ld.collapsed[ld.collapsed$Region=='vHC',],
+  dv = Distance_in_sum,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE
+)
+ld.dist.vhc.anova
+
+
+ld.dist.bla.anova = ezANOVA(
+  data = ld.collapsed[ld.collapsed$Region=='BLA',],
+  dv = Distance_in_sum,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE
+)
+ld.dist.bla.anova
+
+
+```
+
+### Dark side
+```{r}
+
+ld.dark.anova = ezANOVA(
+  data = ld.collapsed,
+  dv = dark_mean,
+  within = Drug,
+  wid = Animal,
+  between = Region,
+  type = 3,
+  white.adj = TRUE
+)
+ld.dark.anova
+
+
+ld.dark.vHC.anova = ezANOVA(
+  data = ld.collapsed[ld.collapsed$Region=='vHC',],
+  dv = dark_mean,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE
+)
+ld.dark.vHC.anova
+
+
+ld.dark.BLA.anova = ezANOVA(
+  data = ld.collapsed[ld.collapsed$Region=='BLA',],
+  dv = dark_mean,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE
+)
+ld.dark.BLA.anova
+
+```
+
+
+
+## EPM
+### Distance travelled
+```{r}
+
+epm.dist.anova = ezANOVA(
+  data = epm.collapsed,
+  dv = Distance_in_sum,
+  within = Drug,
+  wid = Animal,
+  between = Region,
+  type = 3,
+  white.adj = TRUE
+)
+epm.dist.anova
+
+epm.dist.vhc.anova = ezANOVA(
+  data = epm.collapsed[epm.collapsed$Region=='vHC',],
+  dv = Distance_in_sum,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE
+)
+epm.dist.vhc.anova
+
+epm.dist.bla.anova = ezANOVA(
+  data = epm.collapsed[epm.collapsed$Region=='BLA',],
+  dv = Distance_in_sum,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE
+)
+epm.dist.bla.anova
+
+
+```
+
+### Closed arms
+```{r}
+
+epm.closed.anova = ezANOVA(
+  data = epm.collapsed,
+  dv = closed_mean,
+  within = Drug,
+  wid = Animal,
+  between = Region,
+  type = 3,
+  white.adj = TRUE
+)
+epm.closed.anova
+
+epm.closed.vHC.anova = ezANOVA(
+  data = epm.collapsed[epm.collapsed$Region=='vHC',],
+  dv = closed_mean,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE
+)
+epm.closed.vHC.anova
+
+epm.closed.BLA.anova = ezANOVA(
+  data = epm.collapsed[epm.collapsed$Region=='BLA',],
+  dv = closed_mean,
+  within = Drug,
+  wid = Animal,
+  type = 3,
+  white.adj = TRUE
+)
+epm.closed.BLA.anova
+
+```
