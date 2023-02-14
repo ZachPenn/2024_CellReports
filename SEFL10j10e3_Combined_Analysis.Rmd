@@ -3,11 +3,11 @@ title: "SEFL10j10e3_Combined_Analysis"
 author: "Zach"
 output:
   html_document: 
-    #fig_height: 4.5
-    #fig_width: 4.5
-    #highlight: kate
-    #number_sections: yes
-    #theme: journal
+    fig_height: 4.5
+    fig_width: 4.5
+    highlight: kate
+    number_sections: yes
+    theme: journal
     toc: yes
     toc_depth: 6
 editor_options: 
@@ -30,15 +30,12 @@ knitr::opts_chunk$set(
 
 # Load Packages 
 ```{r}
-
 library(ggplot2)
 library(ez)
 library(knitr)
+library(tidyr)
 library(dplyr)
-library(MASS)
 library(purrr)
-library(gridExtra)
-
 ```
 
 
