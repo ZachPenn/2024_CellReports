@@ -1,0 +1,60 @@
+Animal,DOB,Surgery,Notes,Squad,Exclude,trauma,drug,Group
+1,3/2/21,5/18/21,,1,0,NT,Veh,NT - Veh
+2,3/2/21,5/18/21,died before start,,1,,,
+3,3/2/21,5/18/21,,1,0,T,Veh,T - Veh
+4,3/2/21,5/18/21,,1,0,T,Veh,T - Veh
+5,3/2/21,5/20/21,,1,0,NT,Veh,NT - Veh
+6,3/2/21,5/20/21,,1,0,NT,Veh,NT - Veh
+7,3/2/21,5/20/21,lost headcap before start,,1,,,
+8,3/2/21,5/20/21,,1,0,T,ANI,T - ANI
+9,3/2/21,5/20/21,,1,0,T,Veh,T - Veh
+10,3/2/21,5/20/21,,1,0,T,ANI,T - ANI
+11,3/2/21,5/21/21,,1,0,T,ANI,T - ANI
+12,3/2/21,5/21/21,,1,0,T,Veh,T - Veh
+13,3/2/21,5/21/21,,1,0,T,ANI,T - ANI
+14,3/2/21,5/21/21,,1,0,T,Veh,T - Veh
+15,3/2/21,5/21/21,,1,0,T,Veh,T - Veh
+16,3/2/21,5/24/21,lost headcap before start,,1,,,
+17,3/2/21,5/24/21,,1,0,T,ANI,T - ANI
+18,3/2/21,5/24/21,,1,0,T,ANI,T - ANI
+19,3/2/21,5/24/21,,1,0,NT,Veh,NT - Veh
+20,3/2/21,5/24/21,,2,0,NT,Veh,NT - Veh
+21,3/2/21,5/26/21,,2,0,T,Veh,T - Veh
+22,3/2/21,5/26/21,lost headcap before start,2,1,T,Veh,T - Veh
+23,3/2/21,5/26/21,lost headcap on infusion day,2,1,T,ANI,T - ANI
+24,3/2/21,5/26/21,,2,0,NT,Veh,NT - Veh
+25,3/2/21,5/26/21,Very large ventricles. May have been cut on angle. Questionable.,2,0,T,ANI,T - ANI
+26,3/2/21,5/28/21,,2,0,NT,Veh,NT - Veh
+27,3/2/21,5/28/21,lost headcap before start,2,1,T,Veh,T - Veh
+28,3/2/21,5/28/21,,2,0,T,ANI,T - ANI
+29,3/2/21,5/28/21,,2,0,T,Veh,T - Veh
+30,3/2/21,5/28/21,lost headcap on infusion day,2,1,T,Veh,T - Veh
+31,3/2/21,6/1/21,,2,0,T,ANI,T - ANI
+32,3/2/21,6/1/21,,2,0,T,Veh,T - Veh
+33,3/2/21,6/1/21,,2,0,T,ANI,T - ANI
+34,3/2/21,6/1/21,,2,0,T,ANI,T - ANI
+35,3/2/21,6/2/21,dorsal to amygdala,2,1,NT,Veh,NT - Veh
+36,3/2/21,6/2/21,lost headcap before start,2,1,NT,Veh,NT - Veh
+37,3/2/21,6/2/21,,2,0,T,Veh,T - Veh
+38,3/2/21,6/2/21,,2,0,T,Veh,T - Veh
+39,3/4/21,6/2/21,lost headcap before start,2,1,NT,Veh,NT - Veh
+41,9/12/21,12/29/21,,3,0,T,Veh,T - Veh
+42,9/12/21,12/29/21,,3,0,NT,Veh,NT - Veh
+43,9/12/21,12/29/21,,3,0,NT,Veh,NT - Veh
+44,9/12/21,12/29/21,,3,0,T,ANI,T - ANI
+45,9/12/21,12/29/21,,3,0,T,ANI,T - ANI
+46,9/12/21,12/29/21,,3,0,T,Veh,T - Veh
+47,9/12/21,12/29/21,,3,0,T,ANI,T - ANI
+48,9/12/21,12/30/21,,3,0,T,Veh,T - Veh
+49,9/12/21,12/30/21,,3,0,T,Veh,T - Veh
+50,9/12/21,12/30/21,,3,0,T,ANI,T - ANI
+51,9/12/21,12/31/21,,3,0,T,ANI,T - ANI
+52,9/12/21,12/31/21,,3,0,T,Veh,T - Veh
+53,9/12/21,12/31/21,,3,0,T,Veh,T - Veh
+54,9/12/21,12/31/21,,3,0,T,ANI,T - ANI
+55,9/12/21,12/31/21,,3,0,T,Veh,T - Veh
+56,9/12/21,12/31/21,,3,0,T,ANI,T - ANI
+57,9/12/21,12/31/21,,3,0,NT,Veh,NT - Veh
+58,9/12/21,12/31/21,,3,0,T,ANI,T - ANI
+59,9/12/21,12/31/21,,3,0,T,Veh,T - Veh
+60,9/12/21,12/31/21,,3,0,NT,Veh,NT - Veh
