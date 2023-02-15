@@ -1,0 +1,29 @@
+Animal,Exclude,HistoNotes,DOB,Surgery_Date,Region,Virus,Group,Trauma,TraumaRec_ActPSEM1,TraumaRec_ActPSEM2
+1,0,,1/11/22,4/7/22,vHC,PBS,Ctrl,T,Sal,uPSEM
+2,0,,1/11/22,4/7/22,BLA,PBS,Ctrl,T,uPSEM,Sal
+3,0,,1/11/22,4/8/22,BLA,PSAM,BLA - PSAM,T,Sal,uPSEM
+4,1,Substantial spread into pBLA,1/11/22,4/8/22,vHC,PSAM,vHC - PSAM,T,uPSEM,Sal
+5,0,Minor spread into most pBLA,1/11/22,4/8/22,vHC,PSAM,vHC - PSAM,T,Sal,uPSEM
+6,0,,1/11/22,4/8/22,BLA,PSAM,BLA - PSAM,T,Sal,uPSEM
+7,0,,1/11/22,4/7/22,BLA,PBS,Ctrl,T,uPSEM,Sal
+8,0,Minor spread into BLA very posteriorly,1/11/22,4/8/22,vHC,PSAM,vHC - PSAM,T,uPSEM,Sal
+9,0,,1/11/22,4/7/22,vHC,PBS,Ctrl,T,uPSEM,Sal
+10,0,Minor lateral spread,1/11/22,4/11/22,BLA,PSAM,BLA - PSAM,T,Sal,uPSEM
+11,0,,1/11/22,4/7/22,BLA,PBS,Ctrl,T,Sal,uPSEM
+12,0,"Minor spread on one side to pBLA,",1/11/22,4/11/22,vHC,PSAM,vHC - PSAM,T,uPSEM,Sal
+13,0,Minor lateral spread,1/11/22,4/11/22,BLA,PSAM,BLA - PSAM,T,uPSEM,Sal
+14,0,"Less expression, but very selective spatially",1/11/22,4/11/22,vHC,PSAM,vHC - PSAM,T,Sal,uPSEM
+15,0,,1/11/22,4/7/22,vHC,PBS,Ctrl,T,Sal,uPSEM
+16,0,,1/11/22,4/7/22,vHC,PBS,Ctrl,T,uPSEM,Sal
+17,0,,1/11/22,4/11/22,BLA,PSAM,BLA - PSAM,T,uPSEM,Sal
+18,1,Substantial spread into pBLA,1/11/22,4/11/22,vHC,PSAM,vHC - PSAM,T,Sal,uPSEM
+19,0,,1/11/22,4/11/22,BLA,PSAM,BLA - PSAM,T,uPSEM,Sal
+20,0,Unilateral spread into BLA,1/11/22,4/12/22,vHC,PSAM,vHC - PSAM,T,Sal,uPSEM
+21,0,,1/11/22,4/12/22,BLA,PSAM,BLA - PSAM,T,uPSEM,Sal
+22,0,,1/11/22,4/8/22,BLA,PBS,Ctrl,T,uPSEM,Sal
+23,0,Some amount of lateral spread,1/11/22,4/12/22,vHC,PSAM,vHC - PSAM,T,uPSEM,Sal
+24,0,Bit posterior,1/11/22,4/12/22,BLA,PSAM,BLA - PSAM,T,Sal,uPSEM
+25,0,Bit posterior,1/11/22,4/12/22,BLA,PSAM,BLA - PSAM,T,Sal,uPSEM
+26,0,,1/11/22,4/8/22,BLA,PBS,Ctrl,T,Sal,uPSEM
+27,0,Spillover into pBLA on one side,1/11/22,4/12/22,vHC,PSAM,vHC - PSAM,T,uPSEM,Sal
+28,0,,1/11/22,4/12/22,BLA,PSAM,BLA - PSAM,T,uPSEM,Sal
