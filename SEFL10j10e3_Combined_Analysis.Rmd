@@ -192,8 +192,8 @@ traumatest.stats = summarise_at(
 )
 
 
-#mild stressor
-#mild stressor pre/post
+#novel stressor
+#novel stressor pre/post
 novstressor.prepost.stats = summarise_at(
   .tbl = group_by(
     .data = novstressor.prepost,
@@ -201,7 +201,7 @@ novstressor.prepost.stats = summarise_at(
   .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
   .vars = c('freezing','motion')
 )
-#mild stressor startle
+#novel stressor startle
 novstressor.startle.stats = summarise_at(
   .tbl = group_by(
     .data = novstressor.startle,
@@ -698,7 +698,7 @@ P.MS.Startle  +
   
   p.basetheme
 
-if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "MildStressor_Startle.tiff", sep = '_'))}
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Startle.tiff", sep = '_'))}
 
 ```
 
@@ -754,7 +754,7 @@ P.MS.Prepost  +
   
   p.basetheme
 
-if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "MildStressor_Freezing.tiff", sep = '_'))}
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Freezing.tiff", sep = '_'))}
 
 ```
 
