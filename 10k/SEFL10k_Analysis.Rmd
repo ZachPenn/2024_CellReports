@@ -1148,8 +1148,6 @@ traumatest.anova
 
 
 ### Trauma Stats
-
-#### Freezing
 ```{r}
 #comparison of trauma animals' freezing
 trauma.fz.anova = ezANOVA(
