@@ -1475,8 +1475,9 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CtrlsONLY_SEFLTest.tiff",
 
 ```
 
-# Stats
 
+
+# Stats
 ## Anisomycin effects
 #### Contrast sets
 Here, contrasts for a-prior comparisons is set.
@@ -1493,6 +1494,8 @@ comparisons = list(
 pcrit = 1 - (1 - .05)^(1/length(comparisons)) #Dunn-Sidak pcrit
 
 ```
+
+
 
 #### SEFL Test Stats
 ```{r}
@@ -1526,6 +1529,7 @@ paste('critical for multiple comparisons: ', round(pcrit, 4))
 ```
 
 
+
 #### Trauma Test Stats
 ```{r}
 
@@ -1556,6 +1560,7 @@ paste('critical for multiple comparisons: ', round(pcrit, 4))
 
 
 ```
+
 
 
 #### Light Dark Stats
@@ -1622,6 +1627,8 @@ paste('critical for multiple comparisons: ', round(pcrit, 4))
 
 ```
 
+
+
 ## Control Data (vHC/BLA combined)
 Comparisons of T vs NT for animals receiving vehicle.
 #### LightDark
@@ -1639,6 +1646,8 @@ ctrl.ld.dark.anova = ezANOVA(
 
 ```
 
+
+
 #### Trauma recall
 ```{r}
 
@@ -1654,6 +1663,7 @@ ctrl.traumatest.anova = ezANOVA(
 ctrl.traumatest.anova
 
 ```
+
 
 
 ### Nov Stress bl
@@ -1677,6 +1687,8 @@ ctrl.novsts.anova
 
 ```
 
+
+
 ### SEFL test
 ```{r}
 
@@ -1692,6 +1704,7 @@ ctrl.sefltest.anova = ezANOVA(
 ctrl.sefltest.anova
 
 ```
+
 
 
 ## Comparison of VHC and BLA controls
@@ -1725,6 +1738,7 @@ ctrl.comp.ld.dist.anova
 ```
 
 
+
 #### Trauma recall
 ```{r}
 
@@ -1740,6 +1754,7 @@ ctrl.comp.traumatest.anova = ezANOVA(
 ctrl.comp.traumatest.anova
 
 ```
+
 
 
 ### SEFL test
