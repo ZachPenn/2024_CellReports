@@ -36,6 +36,7 @@ library(knitr)
 library(tidyr)
 library(dplyr)
 library(purrr)
+library(gridExtra)
 ```
 
 
@@ -252,7 +253,7 @@ freezing.df = right_join(
 f_pfx = '10j10e3_combined'
 
 #ggsave
-p.save = FALSE
+p.save = TRUE
 
 #Plot dimensions
 p.dim.width = 4.5 #Plot width (in)
@@ -347,7 +348,7 @@ P.Trauma.Freezing = ggplot(
 
 #Define plot specific parameters
 p.ymin = 0
-p.ymax = 90
+p.ymax = 100
 p.yint = 20
 p.breaks = seq(p.ymin,p.ymax,p.yint)
 
@@ -380,7 +381,11 @@ P.Trauma.Freezing  +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('bl','1','2','3','4','5','6','7','8','9','10')) +
   
-  ggtitle("Trauma") + ylab("% Freezing") + xlab("Shock") +
+  labs(
+    #title = "Trauma",
+    x = "",
+    y = "% Freezing"
+  ) +
   
   p.basetheme +
   theme(
@@ -391,7 +396,7 @@ P.Trauma.Freezing  +
       face='plain',
       angle = 0,
       vjust=.5),
-    legend.position = c(.75,.25),
+    legend.position = c(.75,.2),
     plot.margin=unit(c(1, 3.2, .5, 3.2), "cm") #(top,right,bottom,left)
   )
 
@@ -446,7 +451,11 @@ P.Trauma.Shock  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Trauma\nShock Reactivity") + ylab("Motion (au)") + xlab("") +
+  labs(
+    #title = "Trauma\nShock Reactivity",
+    x = "",
+    y = "Motion (au)"
+  ) +
   
   p.basetheme +
   theme(
@@ -454,6 +463,7 @@ P.Trauma.Shock  +
       angle = 0,
       vjust=.5
     ),
+    legend.position = c(.4,.85)
   )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma_ShockReact.tiff", sep = '_'))}
@@ -512,7 +522,12 @@ P.LD.dark  +
   scale_fill_manual(values=p.scale.colour) +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
-  ggtitle("Light-Dark") + ylab("% Time on Dark Side") + xlab("") +
+  
+  labs(
+    #title = "Light-Dark",
+    x = "",
+    y = "% Time on Dark Side"
+  ) +
   
   p.basetheme
 
@@ -576,7 +591,11 @@ P.LD.dist  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
 
-  ggtitle("Light-Dark:\nDistance Travelled") + ylab("Distance (in/min)") + xlab("") +
+  labs(
+    #title = "Light-Dark",
+    x = "",
+    y = "Distance (in/min)"
+  ) +
   
   p.basetheme
 
@@ -640,6 +659,7 @@ P.TraumaTest  +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
 
   ggtitle("Trauma Recall") + ylab("% Freezing") + xlab("") +
+  
   p.basetheme
 
 
@@ -694,9 +714,16 @@ P.MS.Startle  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Novel Stressor\nStartle Response") + ylab("Motion (au)") + xlab("") +
+  labs(
+    #title = "Novel Stressor",
+    x = "",
+    y = "Motion (au)"
+  ) +
   
-  p.basetheme
+  p.basetheme +
+  theme(
+    legend.position =  c(.4,.85)
+  )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Startle.tiff", sep = '_'))}
 
@@ -750,9 +777,16 @@ P.MS.Prepost  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Novel Stressor\nFreezing") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Novel Stressor",
+    x = "",
+    y = "% Freezing"
+  ) +
   
-  p.basetheme
+  p.basetheme +
+  theme(
+    legend.position =  c(.35,.85)
+  )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Freezing.tiff", sep = '_'))}
 
@@ -814,7 +848,11 @@ P.SEFLTest  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Novel Stressor Recall") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Novel Stressor Recall",
+    x = "",
+    y = "% Freezing"
+  ) +
   
   p.basetheme
 
@@ -842,7 +880,7 @@ P.CTRL.Trauma.Freezing = ggplot(
 
 #Define plot specific parameters
 p.ymin = 0
-p.ymax = 90
+p.ymax = 100
 p.yint = 20
 p.breaks = seq(p.ymin,p.ymax,p.yint)
 
@@ -875,7 +913,11 @@ P.CTRL.Trauma.Freezing  +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('bl','1','2','3','4','5','6','7','8','9','10')) +
   
-  ggtitle("Trauma") + ylab("% Freezing") + xlab("Shock") +
+  labs(
+    #title = "Trauma",
+    x = "",
+    y = "% Freezing"
+  ) +
   
   p.basetheme +
   theme(
@@ -886,7 +928,7 @@ P.CTRL.Trauma.Freezing  +
       face='plain',
       angle = 0,
       vjust=.5),
-    legend.position = c(.2,.85),
+    legend.position = c(.2,.9),
     plot.margin=unit(c(1, 3.3, .5, 3.3), "cm") #(top,right,bottom,left)
   )
 
@@ -948,7 +990,12 @@ P.CTRL.LD.dark  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
   scale_x_discrete(labels=c('NT','T')) +
-  ggtitle("Light-Dark") + ylab("% Time on Dark Side") + xlab("") +
+  
+  labs(
+    #title = "Light-Dark",
+    x = "",
+    y = "% Time on Dark Side"
+  ) +
   
   p.basetheme +
   theme(
@@ -1019,7 +1066,12 @@ P.CTRL.TraumaTest  +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('NT','T')) +
 
-  ggtitle("Trauma Recall") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Trauma Recall",
+    x = "",
+    y = "% Freezing"
+  ) +
+  
   p.basetheme +
   theme(
     axis.text.x = element_text(angle=0),
@@ -1096,7 +1148,11 @@ P.NS.baseline  +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('NT','T')) +
   
-  ggtitle("NS Baseline") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "NS Baseline",
+    x = "",
+    y = "% Freezing"
+  ) +
   
   p.basetheme +
   theme(
@@ -1166,7 +1222,11 @@ P.SEFLTest  +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('NT','T')) +
   
-  ggtitle("Novel Stressor Recall") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Nov Stressor Recall",
+    x = "",
+    y = "% Freezing"
+  ) +
   
   p.basetheme +
   theme(
@@ -1178,7 +1238,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRLSEFLTest.tiff", sep =
 ```
 
 ##### Plot Correlations for Trauma Controls
-```{r}
+```{r, fig.width=9.5, fig.height=3.5, }
 
 subdata = freezing.df[freezing.df$Group=='T: veh',]
 subdata$dark = subdata$dark * 100
@@ -1321,7 +1381,11 @@ P.ctrls.LD.dark  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
 
-  ggtitle("Light-Dark") + ylab("% Time on Dark Side") + xlab("") +
+  labs(
+    #title = "Light-Dark",
+    x = "",
+    y = "% Time on Dark Side"
+  ) +
   
   p.basetheme
 
@@ -1394,7 +1458,11 @@ P.ctrls.traumatest  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
 
-  ggtitle("Trauma Recall") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Trauma Recall",
+    x = "",
+    y = "% Freezing"
+  ) +
   
   p.basetheme
 
@@ -1468,7 +1536,11 @@ P.ctrls.sefltest  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
 
-  ggtitle("Novel Stressor Recall") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Novel Stressor Recall",
+    x = "",
+    y = "% Freezing"
+  ) +
   p.basetheme
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CtrlsONLY_SEFLTest.tiff", sep = '_'))}
