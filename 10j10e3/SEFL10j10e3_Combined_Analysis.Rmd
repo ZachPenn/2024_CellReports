@@ -277,7 +277,7 @@ p.line.bar.size = .7
 p.line.error.size = .75
 
 #Widths
-p.width.bar = .7
+p.width.bar = .8
 p.width.jitter = .3
 p.width.error = .5
 
@@ -288,6 +288,11 @@ p.point.stroke = 1
 p.dot.size = 2.5
 p.dot.shape = 21
 p.dot.alpha = .25
+
+#p.margin
+p.margin1 = unit(c(2,3,.5,3), "cm")
+p.margin2 = plot.margin = unit(c(2,3.6,2.2,3.6), "cm")
+p.margin3 = unit(c(2,3.25,2.2,3.25), "cm") #for trauma
 
 #base theme
 p.basetheme = theme_bw() + theme(
@@ -313,7 +318,7 @@ p.basetheme = theme_bw() + theme(
     legend.key = element_rect(colour=NA,fill=NA),
     legend.background = element_rect(fill=NA),
     plot.background = element_rect(fill = "transparent",colour = NA),
-    plot.margin=unit(c(1,3.25,.1,3.25), "cm") #(top,right,bottom,left)
+    plot.margin = p.margin1
   ) 
 
 #predefine partial function for saving plots
@@ -336,7 +341,6 @@ Here, impacts of infusing anisomycin into the BLA/vHC after trauma are assessed.
 ##### Freezing
 ```{r, fig.width=4.5, fig.height=4.5}
 
-
 #Create base layer from group level data
 P.Trauma.Freezing = ggplot(
   data = trauma.freezing.stats,
@@ -348,7 +352,7 @@ P.Trauma.Freezing = ggplot(
 
 #Define plot specific parameters
 p.ymin = 0
-p.ymax = 100
+p.ymax = 80
 p.yint = 20
 p.breaks = seq(p.ymin,p.ymax,p.yint)
 
@@ -396,8 +400,8 @@ P.Trauma.Freezing  +
       face='plain',
       angle = 0,
       vjust=.5),
-    legend.position = c(.75,.2),
-    plot.margin=unit(c(1, 3.2, .5, 3.2), "cm") #(top,right,bottom,left)
+    legend.position = c(.75,.3),
+    plot.margin = p.margin3
   )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma.tiff", sep = '_'))}
@@ -499,7 +503,7 @@ P.LD.dark  +
     colour = "black",
     aes(ymin = dark_mean - dark_sem,
         ymax = dark_mean + dark_sem),
-    #fatten = p.width.error,
+    width = p.width.bar,
     show.legend = FALSE) +
   
   
@@ -658,7 +662,11 @@ P.TraumaTest  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
 
-  ggtitle("Trauma Recall") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Trauma",
+    x = "",
+    y = "% Freezing"
+  ) +
   
   p.basetheme
 
@@ -880,7 +888,7 @@ P.CTRL.Trauma.Freezing = ggplot(
 
 #Define plot specific parameters
 p.ymin = 0
-p.ymax = 100
+p.ymax = 80
 p.yint = 20
 p.breaks = seq(p.ymin,p.ymax,p.yint)
 
@@ -929,7 +937,7 @@ P.CTRL.Trauma.Freezing  +
       angle = 0,
       vjust=.5),
     legend.position = c(.2,.9),
-    plot.margin=unit(c(1, 3.3, .5, 3.3), "cm") #(top,right,bottom,left)
+    plot.margin = p.margin3
   )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRL_Trauma.tiff", sep = '_'))}
@@ -964,7 +972,7 @@ P.CTRL.LD.dark  +
     colour = "black",
     aes(ymin = dark_mean - dark_sem,
         ymax = dark_mean + dark_sem),
-    #fatten = p.width.error,
+    width = p.width.bar,
     show.legend = FALSE) +
   
   
@@ -1000,7 +1008,7 @@ P.CTRL.LD.dark  +
   p.basetheme +
   theme(
     axis.text.x = element_text(angle=0),
-    plot.margin=unit(c(1,3.5,.1,3.5), "cm") #(top,right,bottom,left)
+    plot.margin = p.margin2
   )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRLLD_Dark.tiff", sep = '_'))}
@@ -1075,7 +1083,7 @@ P.CTRL.TraumaTest  +
   p.basetheme +
   theme(
     axis.text.x = element_text(angle=0),
-    plot.margin=unit(c(1,3.5,.1,3.5), "cm") #(top,right,bottom,left)
+    plot.margin = p.margin2
   )
 
 
@@ -1156,7 +1164,8 @@ P.NS.baseline  +
   
   p.basetheme +
   theme(
-    axis.text.x = element_text(angle=0)
+    axis.text.x = element_text(angle=0),
+    plot.margin = p.margin2
   )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRLNSbaseline.tiff", sep = '_'))}
@@ -1230,12 +1239,14 @@ P.SEFLTest  +
   
   p.basetheme +
   theme(
-    axis.text.x = element_text(angle=0)
+    axis.text.x = element_text(angle=0),
+    plot.margin = p.margin2
   )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRLSEFLTest.tiff", sep = '_'))}
 
 ```
+
 
 ##### Plot Correlations for Trauma Controls
 ```{r, fig.width=9.5, fig.height=3.5, }
@@ -1248,6 +1259,7 @@ cor_list = list(
   c('freezing_traumatest', 'freezing_sefltest'),
   c('dark', 'freezing_sefltest')
 )
+names(cor_list) = c('TrecLd', 'TrecSefl','LdSefl')
 
 axis_titles = list(
   'freezing_traumatest' = 'Trauma Recall\n(% Freezing)',
@@ -1264,7 +1276,10 @@ axis_scales = list(
 cor_tests = list()
 cor_plots = list()
 
-for (pair in cor_list){
+for (i in 1:length(cor_list)){
+  
+  n = names(cor_list[i])
+  pair = unlist(cor_list[i])
 
   cor_tests[[paste(pair[1], pair[2])]] = cor.test(
     x=subdata[,pair[1]], 
@@ -1277,7 +1292,7 @@ for (pair in cor_list){
   xscale = unlist(axis_scales[pair[1]], use.names = FALSE)
   yscale = unlist(axis_scales[pair[2]], use.names = FALSE)
   
-  cor_plots[[paste(pair[1], pair[2])]] = ggplot(
+  cor_plots[[n]] = ggplot(
     data = subdata,
     aes_string(x = pair[1], y = pair[2])
   ) +
@@ -1306,17 +1321,17 @@ for (pair in cor_list){
   theme_classic() +
   theme(
     plot.title = element_text(hjust=.5, face='bold'),
-    axis.title = element_text(face='bold')
+    axis.title = element_text(face='bold'),
+    plot.margin = unit(c('2','2.6','2','2.6'),'cm'),
+    plot.background = element_rect(fill = "transparent",colour = NA)
   )
+  
+  if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "_CORR_", n, ".tiff", sep = ''))}
+  print(cor_plots[[n]])
   
 }
 
-grid.arrange(
-  cor_plots[[1]],
-  cor_plots[[2]],
-  cor_plots[[3]],
-  nrow = 1
-)
+
 
 ```
 
@@ -1357,6 +1372,7 @@ P.ctrls.LD.dark  +
     colour = "black",
     aes(ymin = dark_mean - dark_sem,
         ymax = dark_mean + dark_sem),
+    width = p.width.bar,
     show.legend = FALSE) +
   
   geom_jitter(
@@ -1464,7 +1480,7 @@ P.ctrls.traumatest  +
     y = "% Freezing"
   ) +
   
-  p.basetheme
+  p.basetheme 
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CtrlsONLY_TraumaRecall.tiff", sep = '_'))}
 
@@ -1715,6 +1731,7 @@ ctrl.ld.dark.anova = ezANOVA(
   type = 3,
   detailed = TRUE
 )
+ctrl.ld.dark.anova
 
 ```
 
