@@ -36,7 +36,6 @@ library(knitr)
 library(tidyr)
 library(dplyr)
 library(purrr)
-library(gridExtra)
 ```
 
 
@@ -263,8 +262,8 @@ p.dim.dpi = 500 #Plot dpi
 #Plot text
 p.textsize.title = 20
 p.textsize.legend =10
-p.textsize.axis.title = 12
-p.textsize.axis.text = 10
+p.textsize.axis.title = 13
+p.textsize.axis.text = 12
 
 #Plot colors
 p.scale.colour = c("white","darkgray","red","steelblue4",'darkgreen')
@@ -290,9 +289,9 @@ p.dot.shape = 21
 p.dot.alpha = .25
 
 #p.margin
-p.margin1 = unit(c(2,3,.5,3), "cm")
-p.margin2 = plot.margin = unit(c(2,3.6,2.2,3.6), "cm")
-p.margin3 = unit(c(2,3.25,2.2,3.25), "cm") #for trauma
+p.margin1 = unit(c(2, 3, .35, 3), "cm")
+p.margin2 = plot.margin = unit(c(2, 3.6, 2.2, 3.6), "cm")
+p.margin3 = unit(c(2, 3.25, 2.45, 3.25), "cm") #for trauma
 
 #base theme
 p.basetheme = theme_bw() + theme(
@@ -387,14 +386,14 @@ P.Trauma.Freezing  +
   
   labs(
     #title = "Trauma",
-    x = "",
+    x = "Shock",
     y = "% Freezing"
   ) +
   
   p.basetheme +
   theme(
     plot.title = element_text(margin=margin(b=25,t=5)),
-    axis.title.x = element_text(margin = margin(t=10)),
+    axis.title.x = element_text(margin=margin(t=-3)),
     axis.text.x= element_text(
       size=p.textsize.axis.title-2,
       face='plain',
@@ -530,7 +529,7 @@ P.LD.dark  +
   labs(
     #title = "Light-Dark",
     x = "",
-    y = "% Time on Dark Side"
+    y = "% Time in Dark"
   ) +
   
   p.basetheme
@@ -923,14 +922,14 @@ P.CTRL.Trauma.Freezing  +
   
   labs(
     #title = "Trauma",
-    x = "",
+    x = "Shock",
     y = "% Freezing"
   ) +
   
   p.basetheme +
   theme(
     plot.title = element_text(margin=margin(b=25,t=5)),
-    axis.title.x = element_text(margin = margin(t=10)),
+    axis.title.x = element_text(margin=margin(t=-3)),
     axis.text.x= element_text(
       size=p.textsize.axis.title-2,
       face='plain',
@@ -1002,7 +1001,7 @@ P.CTRL.LD.dark  +
   labs(
     #title = "Light-Dark",
     x = "",
-    y = "% Time on Dark Side"
+    y = "% Time in Dark"
   ) +
   
   p.basetheme +
@@ -1248,8 +1247,8 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRLSEFLTest.tiff", sep =
 ```
 
 
-##### Plot Correlations for Trauma Controls
-```{r, fig.width=9.5, fig.height=3.5, }
+##### Correlations for Trauma Controls
+```{r, fig.width=4.5, fig.height=4.5, }
 
 subdata = freezing.df[freezing.df$Group=='T: veh',]
 subdata$dark = subdata$dark * 100
@@ -1275,6 +1274,7 @@ axis_scales = list(
 
 cor_tests = list()
 cor_plots = list()
+x=3
 
 for (i in 1:length(cor_list)){
   
@@ -1316,13 +1316,16 @@ for (i in 1:length(cor_list)){
   labs(
     x = axis_titles[[pair[1]]],
     y = axis_titles[[pair[2]]],
-    title = paste('R-Squared = ', round(c$estimate^2,2), '\n(n=40)')
+    title = bquote(
+      bold(R^.(as.character(2)) == ~ .(as.character(round(c$estimate^2,2)))) #~ " (n=40)"
+    )
   ) +
   theme_classic() +
   theme(
-    plot.title = element_text(hjust=.5, face='bold'),
-    axis.title = element_text(face='bold'),
-    plot.margin = unit(c('2','2.6','2','2.6'),'cm'),
+    plot.title = element_text(hjust=.5, face='bold', size=p.textsize.title-3),
+    axis.text = element_text(size=p.textsize.axis.text, color='black'),
+    axis.title = element_text(face='bold', size=p.textsize.axis.title),
+    plot.margin = unit(c('2.3','2.6','2.3','2.6'),'cm'),
     plot.background = element_rect(fill = "transparent",colour = NA)
   )
   
@@ -1400,7 +1403,7 @@ P.ctrls.LD.dark  +
   labs(
     #title = "Light-Dark",
     x = "",
-    y = "% Time on Dark Side"
+    y = "% Time in Dark"
   ) +
   
   p.basetheme
@@ -1791,6 +1794,14 @@ ctrl.sefltest.anova = ezANOVA(
   detailed = TRUE
 )
 ctrl.sefltest.anova
+
+```
+
+
+### Correlations
+```{r}
+
+cor_tests
 
 ```
 
