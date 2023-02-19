@@ -200,7 +200,7 @@ ld.stats = summarise_at(
 f_pfx = '10g2'
 
 #ggsave
-p.save = FALSE
+p.save = TRUE
 
 #Plot dimensions
 p.dim.width = 4.5 #Plot width (in)
@@ -210,12 +210,12 @@ p.dim.dpi = 500 #Plot dpi
 #Plot text
 p.textsize.title = 20
 p.textsize.legend =10
-p.textsize.axis.title = 12
-p.textsize.axis.text = 10
+p.textsize.axis.title = 13
+p.textsize.axis.text = 12
 
 #Plot colors
-p.scale.colour = c("white","darkgray","red","steelblue4",'darkgreen')
-p.scale.fill = c("white","darkgray","red","steelblue4",'darkgreen')
+p.scale.colour = c("white","darkgray",'darkgreen',"royalblue4","red2")
+p.scale.fill = c("white","darkgray",'darkgreen',"red","steelblue4",'darkgreen')
 
 #Plot line dimensions
 p.line.data.size = 1
@@ -224,7 +224,7 @@ p.line.bar.size = .7
 p.line.error.size = .75
 
 #Widths
-p.width.bar = .7
+p.width.bar = .8
 p.width.jitter = .3
 p.width.error = .5
 
@@ -234,7 +234,12 @@ p.point.size = 4
 p.point.stroke = 1
 p.dot.size = 2.5
 p.dot.shape = 21
-p.dot.alpha = .25
+p.dot.alpha = .3
+
+#p.margin
+p.margin1 = unit(c(2, 3.25, 1, 3.25), "cm")
+p.margin2 = plot.margin = unit(c(2, 3.6, 2.2, 3.6), "cm")
+p.margin3 = unit(c(2, 3.25, 2.45, 3.25), "cm") #for trauma
 
 #base theme
 p.basetheme = theme_bw() + theme(
@@ -260,7 +265,7 @@ p.basetheme = theme_bw() + theme(
     legend.key = element_rect(colour=NA,fill=NA),
     legend.background = element_rect(fill=NA),
     plot.background = element_rect(fill = "transparent",colour = NA),
-    plot.margin=unit(c(1,3.25,.1,3.25), "cm") #(top,right,bottom,left)
+    plot.margin = p.margin1
   ) 
 
 #predefine partial function for saving plots
@@ -276,10 +281,11 @@ saveplot = partial(
 ```
 
 
+
 ## Anisomycin effects
 Here, impacts of systemically inject anisomycin after trauma are assessed.
-#### Trauma
-##### Freezing
+### Trauma
+#### Freezing
 ```{r, fig.width=4.5, fig.height=4.5}
 
 
@@ -294,7 +300,7 @@ P.Trauma.Freezing = ggplot(
 
 #Define plot specific parameters
 p.ymin = 0
-p.ymax = 90
+p.ymax = 80
 p.yint = 20
 p.breaks = seq(p.ymin,p.ymax,p.yint)
 
@@ -327,19 +333,23 @@ P.Trauma.Freezing  +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('bl','1','2','3','4','5','6','7','8','9','10')) +
   
-  ggtitle("Trauma") + ylab("% Freezing") + xlab("Shock") +
+  labs(
+    #title = "Trauma",
+    x = "Shock",
+    y = "% Freezing"
+  ) +
   
   p.basetheme +
   theme(
     plot.title = element_text(margin=margin(b=25,t=5)),
-    axis.title.x = element_text(margin = margin(t=10)),
+    axis.title.x = element_text(margin=margin(t=-3)),
     axis.text.x= element_text(
       size=p.textsize.axis.title-2,
       face='plain',
       angle = 0,
       vjust=.5),
-    legend.position = c(.75,.2),
-    plot.margin=unit(c(1, 3.2, .5, 3.2), "cm") #(top,right,bottom,left)
+    legend.position = c(.9,.23),
+    plot.margin = p.margin3
   )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma.tiff", sep = '_'))}
@@ -348,7 +358,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma.tiff", sep = '_'))
 
 
 
-##### Shock Reactivity
+#### Shock Reactivity
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -393,7 +403,11 @@ P.Trauma.Shock  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Trauma\nShock Reactivity") + ylab("Motion (au)") + xlab("") +
+  labs(
+    #title = "Trauma\nShock Reactivity",
+    x = "",
+    y = "Motion (au)"
+  ) +
   
   p.basetheme +
   theme(
@@ -401,6 +415,7 @@ P.Trauma.Shock  +
       angle = 0,
       vjust=.5
     ),
+    legend.position = c(.4,.85)
   )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma_ShockReact.tiff", sep = '_'))}
@@ -410,8 +425,8 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma_ShockReact.tiff", 
 
 
 
-#### Light-Dark
-##### Dark-Time
+### Light-Dark
+#### Dark-Time
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -437,7 +452,7 @@ P.LD.dark  +
     colour = "black",
     aes(ymin = dark_mean - dark_sem,
         ymax = dark_mean + dark_sem),
-    #fatten = p.width.error,
+    width = p.width.bar,
     show.legend = FALSE) +
   
   
@@ -460,7 +475,12 @@ P.LD.dark  +
   scale_fill_manual(values=p.scale.colour) +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
-  ggtitle("Light-Dark") + ylab("% Time on Dark Side") + xlab("") +
+  
+  labs(
+    #title = "Light-Dark",
+    x = "",
+    y = "% Time in Dark"
+  ) +
   
   p.basetheme
 
@@ -470,7 +490,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "LD_Dark.tiff", sep = '_')
 
 
 
-##### Distance Travelled
+#### Distance Travelled
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -525,7 +545,11 @@ P.LD.dist  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
 
-  ggtitle("Light-Dark:\nDistance Travelled") + ylab("Distance (in/min)") + xlab("") +
+  labs(
+    #title = "Light-Dark",
+    x = "",
+    y = "Distance (in/min)"
+  ) +
   
   p.basetheme
 
@@ -535,7 +559,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "LD_Distance.tiff", sep = 
 
 
 
-#### Trauma Recall
+### Trauma Recall
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -589,7 +613,12 @@ P.TraumaTest  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
 
-  ggtitle("Trauma Recall") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Trauma",
+    x = "",
+    y = "% Freezing"
+  ) +
+  
   p.basetheme
 
 
@@ -599,8 +628,8 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "TraumaRecall.tiff", sep =
 
 
 
-#### Novel Stressor
-##### Startle Response
+### Novel Stressor
+#### Startle Response
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -645,9 +674,16 @@ P.MS.Startle  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Novel Stressor\nStartle Response") + ylab("Motion (au)") + xlab("") +
+  labs(
+    #title = "Novel Stressor",
+    x = "",
+    y = "Motion (au)"
+  ) +
   
-  p.basetheme
+  p.basetheme +
+  theme(
+    legend.position =  c(.4,.85)
+  )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Startle.tiff", sep = '_'))}
 
@@ -655,7 +691,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Startle.tiff"
 
 
 
-##### Pre/Post Freezing
+#### Pre/Post Freezing
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -702,9 +738,16 @@ P.MS.Prepost  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Novel Stressor\nFreezing") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Novel Stressor",
+    x = "",
+    y = "% Freezing"
+  ) +
   
-  p.basetheme
+  p.basetheme +
+  theme(
+    legend.position =  c(.35,.85)
+  )
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Freezing.tiff", sep = '_'))}
 
@@ -712,7 +755,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Freezing.tiff
 
 
 
-#### SEFL Test
+### SEFL Test
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -767,7 +810,11 @@ P.SEFLTest  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Novel Stressor Recall") + ylab("% Freezing") + xlab("") +
+  labs(
+    #title = "Novel Stressor Recall",
+    x = "",
+    y = "% Freezing"
+  ) +
   
   p.basetheme
 
@@ -785,9 +832,7 @@ Here, contrasts for a-prior comparisons is set.
 
 #a-prior comparisons
 comparisons = list(
-  c('NT: veh', 'T: veh'),
-  c('T: veh', 'T: ani'),
-  c('NT: veh', 'T: ani')
+  c('T: veh', 'T: ani')
 )
 
 pcrit = 1 - (1 - .05)^(1/length(comparisons)) #Dunn-Sidak pcrit

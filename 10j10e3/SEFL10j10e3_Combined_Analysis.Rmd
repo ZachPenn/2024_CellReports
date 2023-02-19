@@ -266,8 +266,8 @@ p.textsize.axis.title = 13
 p.textsize.axis.text = 12
 
 #Plot colors
-p.scale.colour = c("white","darkgray","red","steelblue4",'darkgreen')
-p.scale.fill = c("white","darkgray","red","steelblue4",'darkgreen')
+p.scale.colour = c("white","darkgray","royalblue4","red2",'darkgreen')
+p.scale.fill = c("white","darkgray","royalblue4","red2",'darkgreen')
 
 #Plot line dimensions
 p.line.data.size = 1
@@ -286,7 +286,7 @@ p.point.size = 4
 p.point.stroke = 1
 p.dot.size = 2.5
 p.dot.shape = 21
-p.dot.alpha = .25
+p.dot.alpha = .3
 
 #p.margin
 p.margin1 = unit(c(2, 3, .35, 3), "cm")
@@ -336,8 +336,8 @@ saveplot = partial(
 
 ## Anisomycin effects
 Here, impacts of infusing anisomycin into the BLA/vHC after trauma are assessed.
-#### Trauma
-##### Freezing
+### Trauma
+#### Freezing
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -409,7 +409,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma.tiff", sep = '_'))
 
 
 
-##### Shock Reactivity
+#### Shock Reactivity
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -475,8 +475,8 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma_ShockReact.tiff", 
 ```
 
 
-#### Light-Dark
-##### Dark-Time
+### Light-Dark
+#### Dark-Time
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -539,7 +539,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "LD_Dark.tiff", sep = '_')
 ```
 
 
-##### Distance Travelled
+#### Distance Travelled
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -578,7 +578,7 @@ P.LD.dist  +
     size = p.dot.size,
     colour = 'black',
     fill=NA,
-    alpha = .5,
+    alpha = p.dot.alpha,
     show.legend=FALSE
   ) +
   
@@ -607,7 +607,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "LD_Distance.tiff", sep = 
 ```
 
 
-#### Trauma Recall
+### Trauma Recall
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -675,8 +675,8 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "TraumaRecall.tiff", sep =
 ```
 
 
-#### Novel Stressor
-##### Startle Response
+### Novel Stressor
+#### Startle Response
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -737,7 +737,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Startle.tiff"
 ```
 
 
-##### Pre/Post Freezing
+#### Pre/Post Freezing
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -800,7 +800,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Freezing.tiff
 ```
 
 
-#### SEFL Test
+### SEFL Test
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -870,7 +870,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "SEFLTest.tiff", sep = '_'
 
 ## Plot Control Data (vHC/BLA combined)
 Control animals that received vehicle infusions are plotted for visualization of typical effects observed.
-##### Trauma Freezing
+### Trauma Freezing
 ```{r, fig.width=4.5, fig.height=4.5}
 
 
@@ -915,7 +915,7 @@ P.CTRL.Trauma.Freezing  +
     stroke = p.point.stroke
   ) +
   
-  scale_fill_manual(values=c('white','red3'), labels=(c('NT','T'))) +
+  scale_fill_manual(values = p.scale.fill , labels=(c('NT','T'))) +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('bl','1','2','3','4','5','6','7','8','9','10')) +
@@ -943,7 +943,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRL_Trauma.tiff", sep = 
 
 ```
 
-##### Light-Dark
+### Light-Dark
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -993,7 +993,7 @@ P.CTRL.LD.dark  +
   
   geom_hline(yintercept = .5, linetype='dashed') +
   
-  scale_fill_manual(values=c('white','red3')) +
+  scale_fill_manual(values = p.scale.fill , labels=(c('NT','T'))) +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
   scale_x_discrete(labels=c('NT','T')) +
@@ -1014,7 +1014,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRLLD_Dark.tiff", sep = 
 
 ```
 
-##### Trauma Recall
+### Trauma Recall
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -1068,7 +1068,7 @@ P.CTRL.TraumaTest  +
         ymax = freezing_mean + freezing_sem,
         width = p.width.error)) +
   
-  scale_fill_manual(values=c('white','red3')) +
+  scale_fill_manual(values = p.scale.fill , labels=(c('NT','T'))) +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('NT','T')) +
@@ -1091,7 +1091,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRLTraumaRecall.tiff", s
 ```
 
 
-##### Novel Stressor BL
+### Novel Stressor BL
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -1150,7 +1150,7 @@ P.NS.baseline  +
         ymax = freezing_mean + freezing_sem,
         width = p.width.error)) +
   
-  scale_fill_manual(values=c('white','red3')) +
+  scale_fill_manual(values = p.scale.fill , labels=(c('NT','T'))) +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('NT','T')) +
@@ -1171,7 +1171,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRLNSbaseline.tiff", sep
 
 ```
 
-##### SEFL Test
+### SEFL Test
 ```{r, fig.width=4.5, fig.height=4.5}
 
 #Create base layer from group level data
@@ -1225,7 +1225,7 @@ P.SEFLTest  +
         ymax = freezing_mean + freezing_sem,
         width = p.width.error)) +
   
-  scale_fill_manual(values=c('white','red3')) +
+  scale_fill_manual(values = p.scale.fill , labels=(c('NT','T'))) +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('NT','T')) +
@@ -1247,7 +1247,7 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CTRLSEFLTest.tiff", sep =
 ```
 
 
-##### Correlations for Trauma Controls
+### Correlations for Trauma Controls
 ```{r, fig.width=4.5, fig.height=4.5, }
 
 subdata = freezing.df[freezing.df$Group=='T: veh',]
@@ -1298,9 +1298,11 @@ for (i in 1:length(cor_list)){
   ) +
 
   geom_point(
+    shape = 21,
     size = 3,
-    color = 'red4',
-    alpha = .6
+    color = 'black',
+    fill = p.scale.fill[2],
+    alpha = .8
   ) +
   
   scale_x_continuous(
@@ -1576,7 +1578,6 @@ Here, contrasts for a-prior comparisons is set.
 
 #a-prior comparisons
 comparisons = list(
-  c('NT: veh', 'T: veh'),
   c('T: veh', 'T: ani-BLA'),
   c('T: veh', 'T: ani-vHC'),
   c('T: ani-BLA', 'T: ani-vHC')
