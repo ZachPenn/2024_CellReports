@@ -200,7 +200,7 @@ ld.stats = summarise_at(
 f_pfx = '10g2'
 
 #ggsave
-p.save = TRUE
+p.save = FALSE
 
 #Plot dimensions
 p.dim.width = 4.5 #Plot width (in)
@@ -214,8 +214,10 @@ p.textsize.axis.title = 13
 p.textsize.axis.text = 12
 
 #Plot colors
-p.scale.colour = c("white","darkgray",'darkgreen',"royalblue4","red2")
-p.scale.fill = c("white","darkgray",'darkgreen',"red","steelblue4",'darkgreen')
+p.scale.colour = c("white","thistle4",'paleturquoise4',"#26466D","red4")
+p.scale.fill = c("white","thistle4",'paleturquoise4',"#26466D","red4")
+#p.scale.colour = c("white","darkgray",'darkgreen',"royalblue4","red2")
+#p.scale.fill = c("white","darkgray",'darkgreen',"red","steelblue4",'darkgreen')
 
 #Plot line dimensions
 p.line.data.size = 1
@@ -467,7 +469,7 @@ P.LD.dark  +
     colour = 'black',
     fill=NA,
     alpha = p.dot.alpha,
-    show.legend=FALSE
+    show.legend = FALSE
   ) +
   
   geom_hline(yintercept = .5, linetype='dashed') +

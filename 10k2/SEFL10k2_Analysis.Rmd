@@ -186,8 +186,8 @@ p.textsize.axis.title = 13
 p.textsize.axis.text = 12
 
 #Plot colors
-p.scale.colour = c("royalblue4","red2",'darkgreen')
-p.scale.fill = c("royalblue4","red2",'darkgreen')
+p.scale.colour = c("#26466D","red4",'paleturquoise4')
+p.scale.fill = c("#26466D","red4",'paleturquoise4')
 
 #Plot line dimensions
 p.line.data.size = 1
