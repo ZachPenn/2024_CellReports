@@ -252,7 +252,7 @@ freezing.df = right_join(
 f_pfx = '10j10e3_combined'
 
 #ggsave
-p.save = TRUE
+p.save = FALSE
 
 #Plot dimensions
 p.dim.width = 4.5 #Plot width (in)
@@ -1579,6 +1579,7 @@ Here, contrasts for a-prior comparisons is set.
 
 #a-prior comparisons
 comparisons = list(
+  c('NT: veh', 'T: veh'),
   c('T: veh', 'T: ani-BLA'),
   c('T: veh', 'T: ani-vHC'),
   c('T: ani-BLA', 'T: ani-vHC')
@@ -1588,6 +1589,25 @@ pcrit = 1 - (1 - .05)^(1/length(comparisons)) #Dunn-Sidak pcrit
 
 ```
 
+
+### Trauma stats
+```{r}
+
+
+trauma.anova = ezANOVA(
+  data = trauma.freezing[trauma.freezing$Group!='NT: veh',],
+  dv = freezing,
+  wid = Animal,
+  between = Group,
+  within = component,
+  white.adjust = TRUE,
+  type = 3,
+  return_aov = TRUE
+)
+trauma.anova
+
+
+```
 
 
 #### SEFL Test Stats
@@ -1738,6 +1758,13 @@ ctrl.ld.dark.anova = ezANOVA(
 )
 ctrl.ld.dark.anova
 
+ctrl.ld.t = t.test(
+      dark ~ Group,
+      data = ctrl.ld,
+      var.equal = FALSE
+)
+ctrl.ld.t
+
 ```
 
 
@@ -1755,6 +1782,13 @@ ctrl.traumatest.anova = ezANOVA(
   detailed = TRUE
 )
 ctrl.traumatest.anova
+
+ctrl.traumatest.t = t.test(
+      freezing ~ Group,
+      data = ctrl.traumatest,
+      var.equal = FALSE
+)
+ctrl.traumatest.t
 
 ```
 
@@ -1779,6 +1813,16 @@ ctrl.novsts.anova = ezANOVA(
 )
 ctrl.novsts.anova
 
+ctrl.novsts.t = t.test(
+      freezing ~ Group,
+      data = novstressor.prepost[
+        novstressor.prepost$component == 'bl' &(novstressor.prepost$Group=='NT: veh' | novstressor.prepost$Group=='T: veh'),
+        ],
+      var.equal = FALSE
+)
+ctrl.novsts.t
+
+
 ```
 
 
@@ -1796,6 +1840,13 @@ ctrl.sefltest.anova = ezANOVA(
   detailed = TRUE
 )
 ctrl.sefltest.anova
+
+ctrl.sefltest.t = t.test(
+      freezing ~ Group,
+      data = ctrl.sefltest,
+      var.equal = FALSE
+)
+ctrl.sefltest.t
 
 ```
 

@@ -172,7 +172,7 @@ ld.stats = summarise_at(
 f_pfx = '10k2'
 
 #ggsave
-p.save = TRUE
+p.save = FALSE
 
 #Plot dimensions
 p.dim.width = 4.5 #Plot width (in)
@@ -212,7 +212,7 @@ p.dot.alpha = .3
 
 #p.margin
 p.margin1 = unit(c(2, 3, .8, 3), "cm")
-p.margin2 = plot.margin = unit(c(2, 3.6, 2.2, 3.6), "cm")
+p.margin2 = unit(c(2, 3.6, 2.2, 3.6), "cm")
 p.margin3 = unit(c(2, 3.25, 2.45, 3.25), "cm") #for trauma
 
 #base theme
@@ -594,6 +594,12 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "LD_Dark.tiff", sep = '_')
 
 
 # Statistics
+## Dunn's stat
+```{r}
+pcrit = 1 - (1 - .05)^(1/4) #Dunn-Sidak pcrit
+pcrit
+```
+
 ## Open field
 ### Distance travelled
 ```{r}

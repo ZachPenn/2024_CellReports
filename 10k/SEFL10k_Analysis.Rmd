@@ -211,7 +211,7 @@ ld.stats = summarise_at(
 f_pfx = '10k'
 
 #ggsave
-p.save = TRUE
+p.save = FALSE
 
 #Plot dimensions
 p.dim.width = 4.5 #Plot width (in)
@@ -1157,12 +1157,28 @@ Here, contrasts for a-prior comparisons is set.
 
 #a-prior comparisons
 comparisons = list(
-  c('Ctrl', 'BLA - PSAM'),
-  c('Ctrl', 'vHC - PSAM'),
-  c('vHC - PSAM', 'BLA - PSAM')
+  c('Ctrl', 'PSAM-BLA'),
+  c('Ctrl', 'PSAM-vHC')
 )
 
 pcrit = 1 - (1 - .05)^(1/length(comparisons)) #Dunn-Sidak pcrit
+
+```
+
+## trauma
+```{r}
+
+trauma.fz.anova = ezANOVA(
+  data = trauma.freezing,
+  dv = freezing,
+  wid = Animal,
+  within = component,
+  white.adjust = TRUE,
+  between = Group,
+  type = 3,
+  detailed = TRUE
+)
+trauma.fz.anova
 
 ```
 
@@ -1218,7 +1234,7 @@ traumatest.anova
 ```{r}
 #comparison of trauma animals' freezing
 trauma.fz.anova = ezANOVA(
-  data = trauma.freezing[trauma.freezing$Group!='NT - Veh',],
+  data = trauma.freezing,
   dv = freezing,
   wid = Animal,
   within = component,

@@ -145,7 +145,7 @@ traumatest.stats = summarise_at(
   .tbl = group_by(
     .data = traumatest,
     Group),
-  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n()), count=~n()),
   .vars = c('freezing','motion')
 )
 
@@ -834,6 +834,7 @@ Here, contrasts for a-prior comparisons is set.
 
 #a-prior comparisons
 comparisons = list(
+  #c('NT: veh', 'T: veh'),
   c('T: veh', 'T: ani')
 )
 
@@ -891,7 +892,7 @@ paste('critical for multiple comparisons: ', round(pcrit, 4))
 
 
 
-#### Trauma Test Stats
+#### Trauma Recall Stats
 ```{r}
 
 traumatest.anova = ezANOVA(

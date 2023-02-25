@@ -1,0 +1,21 @@
+Animal,Exclude,DOB,SurgeryDate,Virus,Region,Group,HistologyNotes,Notes,Recall1,Recall2,NS,NS_Group
+1,0,10/11/22,1/11/22,PSAM,vHC,vHC - PSAM,Minor lateral spread,,veh,uPSEM,uPSEM,vHC - uPSEM
+2,0,10/11/22,1/11/22,PSAM,BLA,BLA - PSAM,Some lateral spread on one side.,,veh,uPSEM,uPSEM,BLA - uPSEM
+3,0,10/11/22,1/11/22,PSAM,BLA,BLA - PSAM,Lateral spread on one side,,uPSEM,veh,veh,veh
+4,0,10/11/22,1/11/22,PSAM,vHC,vHC - PSAM,Some spread into most posterior amygdala at level of vHC,,uPSEM,veh,veh,veh
+5,0,10/11/22,1/12/22,PSAM,BLA,BLA - PSAM,Some lateral spread on one side.,,veh,uPSEM,uPSEM,BLA - uPSEM
+6,0,10/11/22,1/12/22,PSAM,BLA,BLA - PSAM,,,uPSEM,veh,uPSEM,BLA - uPSEM
+7,0,10/11/22,1/12/22,PSAM,vHC,vHC - PSAM,Minor lateral spread,,veh,uPSEM,veh,veh
+8,0,10/11/22,1/12/22,PSAM,vHC,vHC - PSAM,,,uPSEM,veh,uPSEM,vHC - uPSEM
+9,1,10/11/22,1/12/22,PSAM,vHC,vHC - PSAM,Minimal expression on one side,,uPSEM,veh,veh,veh
+10,0,10/11/22,1/12/22,PSAM,BLA,BLA - PSAM,,,uPSEM,veh,veh,veh
+11,0,10/11/22,1/12/22,PSAM,vHC,vHC - PSAM,,,veh,uPSEM,uPSEM,vHC - uPSEM
+12,0,10/11/22,1/12/22,PSAM,BLA,BLA - PSAM,,,veh,uPSEM,veh,veh
+13,1,10/11/22,1/13/22,PSAM,vHC,vHC - PSAM,,Died during surgical recovery,,,,0
+14,1,10/11/22,1/13/22,PSAM,vHC,vHC - PSAM,Very light expression on one side that is more focused laterally,,veh,uPSEM,veh,veh
+15,0,10/11/22,1/13/22,PSAM,BLA,BLA - PSAM,,,uPSEM,veh,uPSEM,BLA - uPSEM
+16,0,10/11/22,1/13/22,PSAM,BLA,BLA - PSAM,Tiniest bit of spread in anterior portion of vCA1 on one side,,veh,uPSEM,uPSEM,BLA - uPSEM
+17,0,10/11/22,1/13/22,PSAM,vHC,vHC - PSAM,"Lateral spread on one side, including most posterior amygdala",,veh,uPSEM,uPSEM,vHC - uPSEM
+18,0,10/11/22,1/13/22,PSAM,vHC,vHC - PSAM,Little bit of spread to most posterior amygdala,,uPSEM,veh,uPSEM,vHC - uPSEM
+19,0,10/11/22,1/13/22,PSAM,BLA,BLA - PSAM,,,veh,uPSEM,veh,veh
+20,1,10/11/22,1/13/22,PSAM,BLA,BLA - PSAM,Expression unilateral,,uPSEM,veh,uPSEM,BLA - uPSEM
