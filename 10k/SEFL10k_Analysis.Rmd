@@ -28,6 +28,8 @@ library(ggplot2)
 library(ez)
 library(knitr)
 library(tidyr)
+library(lmtest)
+library(car)
 library(dplyr)
 library(purrr)
 ```
@@ -1153,6 +1155,10 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CtrlsONLY_SEFLTest.tiff",
 ## PSAM effects
 ### Contrast sets
 Here, contrasts for a-prior comparisons is set.
+Here, contrasts for a-prior comparisons is set.
+Currently, all planned comparisons performed independent of omnibus because of 
+heteroscedasticity. Comparisons were performed using both Welch procedure and
+hccm standard errors and rendered the same pattern of results.
 ```{r}
 
 #a-prior comparisons
@@ -1162,6 +1168,12 @@ comparisons = list(
 )
 
 pcrit = 1 - (1 - .05)^(1/length(comparisons)) #Dunn-Sidak pcrit
+
+#function to perform hccm coefficient tests
+coeftest.hccm = function(linmod) {
+  tests = coeftest(linmod, hccm(linmod, 'hc3'))
+  return(list('tests'=tests, 'df'=linmod$df.residual))
+}
 
 ```
 
@@ -1197,6 +1209,7 @@ sefl.anova = ezANOVA(
 sefl.anova
 
 sefltest.posthoc = list()
+sefltest.hccm.posthoc = list()
 for (comp in comparisons){
   sefltest.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
     sefltest,
@@ -1205,8 +1218,15 @@ for (comp in comparisons){
       var.equal = FALSE
     )
   )
+  linmod = lm(
+    freezing~Group, 
+    data = sefltest,
+    subset = sefltest$Group==comp[1] | sefltest$Group==comp[2]
+  )
+  sefltest.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
 }
 sefltest.posthoc
+sefltest.hccm.posthoc
 paste('critical for multiple comparisons: ', round(pcrit, 4))
 
 ```
@@ -1265,16 +1285,23 @@ ld.dark.anova = ezANOVA(
 ld.dark.anova
 
 ld.dark.posthoc = list()
+ld.dark.hccm.posthoc = list()
 for (comp in comparisons){
   ld.dark.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
     ld.collapsed,
     t.test(
       dark[Group==comp[1]], dark[Group==(comp)[2]],
       var.equal = FALSE
-    )
+    ))
+  linmod = lm(
+    dark~Group, 
+    data = ld.collapsed,
+    subset = ld.collapsed$Group==comp[1] | ld.collapsed$Group==comp[2]
   )
+  ld.dark.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
 }
 ld.dark.posthoc
+ld.dark.hccm.posthoc
 paste('critical for multiple comparisons: ', round(pcrit, 4))
 
 
@@ -1296,16 +1323,23 @@ ld.dist.anova = ezANOVA(
 print(ld.dist.anova)
 
 ld.dist.posthoc = list()
+ld.dist.hccm.posthoc = list()
 for (comp in comparisons){
   ld.dist.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
     ld.collapsed,
     t.test(
       Distance_in[Group==comp[1]], Distance_in[Group==(comp)[2]],
       var.equal = FALSE
-    )
+    ))
+  linmod = lm(
+    Distance_in~Group, 
+    data = ld.collapsed,
+    subset = ld.collapsed$Group==comp[1] | ld.collapsed$Group==comp[2]
   )
+  ld.dist.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
 }
 ld.dist.posthoc
+ld.dist.hccm.posthoc
 paste('critical for multiple comparisons: ', round(pcrit, 4))
 
 ```
