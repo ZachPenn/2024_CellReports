@@ -21,18 +21,23 @@ For each figure, we highlight the respective experiments included.
 
 A very brief description of experiments.  See manuscript for details.
 ### 10g2
+
 Anisomycin given systemically after trauma.  A week later, animals tested in light-dark test, trauma memory recall, and novel stressor and subsequent novel stressor recall.  Note that although this experiment includes animals given anisomycin either 2 or 3 times after trauma, only animals receiving 3 injections of anisomycin are included in manuscript.  
 
 ### 10j10e3
+
 Anisomycin in either the BLA (10e3) or vHC (10j) just after trauma.  A week later, animals tested in light-dark test, trauma memory recall, and novel stressor test and subsequent novel stressor recall.  Additionally, controls from these experiemnts given vehicle were utilized to show normative effects and relationships between phenotypes.  For main analysis, controls with vehicle in vHC or BLA were collapsed after being shown to not be different.
 
 ### 10k
+
 Effect of inhibiting either BLA or vHC on light-dark test and novel stressor.
 
 ### 10k2
+
 Effect of inhibiting either BLA or vHC on light-dark, open field, and elevated plus maze tests.
 
 ### 10k5
+
 Effect of inhibiting either BLA or vHC during trauma memory recall.  Note animals also received uPSEM or vehicle with novel stressor at end of experiment (currently low N).
 
 
