@@ -1,0 +1,25 @@
+Animal,Exclude,Notes,Sex,Exp,DOB,SinglyHoused,Group,coc_side,coc_trndays
+1,1,Technician accidentally ran wrong file during training and administered 10 sec long shock on day 2 of training,M,SEFL7c,,9/11/20,T,left,odd
+2,1,Technician accidentally ran wrong file during training and administered 10 sec long shock on day 2 of training,M,SEFL7c,,9/11/20,T,left,odd
+3,1,Technician accidentally ran wrong file during training and administered 10 sec long shock on day 2 of training,M,SEFL7c,,9/11/20,T,left,odd
+4,1,Technician accidentally ran wrong file during training and administered 10 sec long shock on day 2 of training,M,SEFL7c,,9/11/20,T,left,odd
+5,0,,M,SEFL7c,,9/11/20,NT,left,odd
+6,0,,M,SEFL7c,,9/11/20,NT,left,odd
+7,0,,M,SEFL7c,,9/11/20,NT,left,odd
+8,0,,M,SEFL7c,,9/11/20,NT,left,odd
+9,0,,M,SEFL7c,,9/11/20,T,left,odd
+10,0,,M,SEFL7c,,9/11/20,NT,left,odd
+11,0,,M,SEFL7c,,9/11/20,T,left,odd
+12,0,,M,SEFL7c,,9/11/20,NT,left,odd
+13,0,,M,SEFL7c,,9/11/20,NT,right,even
+14,0,,M,SEFL7c,,9/11/20,T,right,even
+15,0,,M,SEFL7c,,9/11/20,NT,right,even
+16,0,,M,SEFL7c,,9/11/20,T,right,even
+17,0,,M,SEFL7c,,9/11/20,NT,right,even
+18,0,,M,SEFL7c,,9/11/20,T,right,even
+19,0,,M,SEFL7c,,9/11/20,NT,right,even
+20,0,,M,SEFL7c,,9/11/20,T,right,even
+21,0,,M,SEFL7c,,9/11/20,NT,right,even
+22,0,,M,SEFL7c,,9/11/20,T,right,even
+23,0,,M,SEFL7c,,9/11/20,NT,right,even
+24,0,,M,SEFL7c,,9/11/20,T,right,even
