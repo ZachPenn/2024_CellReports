@@ -34,6 +34,8 @@ library(ggplot2)
 library(ez)
 library(knitr)
 library(tidyr)
+library(lmtest)
+library(car)
 library(dplyr)
 library(purrr)
 ```
@@ -1575,6 +1577,9 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CtrlsONLY_SEFLTest.tiff",
 ## Anisomycin effects
 #### Contrast sets
 Here, contrasts for a-prior comparisons is set.
+Currently, all planned comparisons performed independent of omnibus because of 
+heteroscedasticity. Comparisons were performed using both Welch procedure and
+hccm standard errors and rendered the same pattern of results.
 ```{r}
 
 #a-prior comparisons
@@ -1585,9 +1590,17 @@ comparisons = list(
   c('T: ani-BLA', 'T: ani-vHC')
 )
 
-pcrit = 1 - (1 - .05)^(1/length(comparisons)) #Dunn-Sidak pcrit
+pcrit = 1 - (1 - .05)^(1/(length(comparisons)-1)) #Dunn-Sidak pcrit
+#Do not include NT: veh vs. T: veh in posthoc comparisons
+
+#function to perform hccm coefficient tests
+coeftest.hccm = function(linmod) {
+  tests = coeftest(linmod, hccm(linmod, 'hc3'))
+  return(list('tests'=tests, 'df'=linmod$df.residual))
+}
 
 ```
+
 
 
 ### Trauma stats
@@ -1627,6 +1640,7 @@ sefl.anova
 
 
 sefltest.posthoc = list()
+sefltest.hccm.posthoc = list()
 for (comp in comparisons){
   sefltest.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
     sefltest,
@@ -1635,8 +1649,16 @@ for (comp in comparisons){
       var.equal = FALSE
     )
   )
+  linmod = lm(
+    freezing~Group, 
+    data = sefltest,
+    subset = sefltest$Group==comp[1] | sefltest$Group==comp[2]
+  )
+  sefltest.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
 }
+
 sefltest.posthoc
+sefltest.hccm.posthoc
 paste('critical for multiple comparisons: ', round(pcrit, 4))
 
 ```
@@ -1659,6 +1681,7 @@ traumatest.anova
 
 
 traumatest.posthoc = list()
+traumatest.hccm.posthoc = list()
 for (comp in comparisons){
   traumatest.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
     traumatest,
@@ -1667,8 +1690,16 @@ for (comp in comparisons){
       var.equal = FALSE
     )
   )
+  
+  linmod = lm(
+    freezing~Group, 
+    data = traumatest,
+    subset = traumatest$Group==comp[1] | traumatest$Group==comp[2]
+  )
+  traumatest.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
 }
 traumatest.posthoc
+traumatest.hccm.posthoc
 paste('critical for multiple comparisons: ', round(pcrit, 4))
 
 
@@ -1694,6 +1725,7 @@ ld.dark.anova
 
 
 ld.dark.posthoc = list()
+ld.dark.hccm.posthoc = list()
 for (comp in comparisons){
   ld.dark.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
     ld.collapsed,
@@ -1702,8 +1734,15 @@ for (comp in comparisons){
       var.equal = FALSE
     )
   )
+  linmod = lm(
+    dark~Group, 
+    data = ld.collapsed,
+    subset = ld.collapsed$Group==comp[1] | ld.collapsed$Group==comp[2]
+  )
+  ld.dark.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
 }
 ld.dark.posthoc
+ld.dark.hccm.posthoc
 paste('critical for multiple comparisons: ', round(pcrit, 4))
 
 
@@ -1725,14 +1764,20 @@ ld.dist.anova = ezANOVA(
 ld.dist.anova
 
 ld.dist.posthoc = list()
+ld.dist.hccm.posthoc = list()
 for (comp in comparisons){
   ld.dist.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
     ld.collapsed,
     t.test(
       Distance_in[Group==comp[1]], Distance_in[Group==(comp)[2]],
       var.equal = FALSE
-    )
+    ))
+  linmod = lm(
+    Distance_in~Group, 
+    data = ld.collapsed,
+    subset = ld.collapsed$Group==comp[1] | ld.collapsed$Group==comp[2]
   )
+  ld.dist.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
 }
 ld.dist.posthoc
 paste('critical for multiple comparisons: ', round(pcrit, 4))
@@ -1747,16 +1792,12 @@ Comparisons of T vs NT for animals receiving vehicle.
 #### LightDark
 ```{r}
 
-ctrl.ld.dark.anova = ezANOVA(
+ctrl.ld.linmod = lm(
+  dark ~ Group,
   data = ctrl.ld,
-  dv = dark,
-  wid = Animal,
-  between = c(Group),
-  white.adjust = TRUE,
-  type = 3,
-  detailed = TRUE
 )
-ctrl.ld.dark.anova
+ctrl.ld.t.hccm = coeftest.hccm(ctrl.ld.linmod) 
+ctrl.ld.t.hccm
 
 ctrl.ld.t = t.test(
       dark ~ Group,
@@ -1772,16 +1813,12 @@ ctrl.ld.t
 #### Trauma recall
 ```{r}
 
-ctrl.traumatest.anova = ezANOVA(
+ctrl.traumatest.linmod = lm(
+  freezing ~ Group,
   data = ctrl.traumatest,
-  dv = freezing,
-  wid = Animal,
-  between = c(Group),
-  white.adjust = TRUE,
-  type = 3,
-  detailed = TRUE
 )
-ctrl.traumatest.anova
+ctrl.traumatest.t.hccm = coeftest.hccm(ctrl.traumatest.linmod) 
+ctrl.traumatest.t.hccm
 
 ctrl.traumatest.t = t.test(
       freezing ~ Group,
@@ -1797,27 +1834,17 @@ ctrl.traumatest.t
 ### Nov Stress bl
 ```{r}
 
-#change to non-parametric or glm?
-
-ctrl.novsts.anova = ezANOVA(
-  data = novstressor.prepost[
-    novstressor.prepost$component == 'bl' &
-    (novstressor.prepost$Group=='NT: veh' | novstressor.prepost$Group=='T: veh'),
-  ],
-  dv = freezing,
-  wid = Animal,
-  between = c(Group),
-  white.adjust = TRUE,
-  type = 3,
-  detailed = TRUE
+sbset = novstressor.prepost$component == 'bl' & (novstressor.prepost$Group=='NT: veh' | novstressor.prepost$Group=='T: veh')
+ctrl.novsts.linmod= lm(
+  freezing ~ Group,
+  data = novstressor.prepost[sbset,]
 )
-ctrl.novsts.anova
+ctrl.novsts.hccm.t = coeftest.hccm(ctrl.novsts.linmod)
+ctrl.novsts.hccm.t
 
 ctrl.novsts.t = t.test(
       freezing ~ Group,
-      data = novstressor.prepost[
-        novstressor.prepost$component == 'bl' &(novstressor.prepost$Group=='NT: veh' | novstressor.prepost$Group=='T: veh'),
-        ],
+      data = novstressor.prepost[sbset,],
       var.equal = FALSE
 )
 ctrl.novsts.t
@@ -1830,16 +1857,12 @@ ctrl.novsts.t
 ### SEFL test
 ```{r}
 
-ctrl.sefltest.anova = ezANOVA(
-  data = ctrl.sefltest,
-  dv = freezing,
-  wid = Animal,
-  between = c(Group),
-  white.adjust = TRUE,
-  type = 3,
-  detailed = TRUE
+ctrl.sefltest.linmod = lm(
+  freezing ~ Group,
+  data = ctrl.sefltest
 )
-ctrl.sefltest.anova
+ctrl.sefltest.hccm.t = coeftest.hccm(ctrl.sefltest.linmod) 
+ctrl.sefltest.hccm.t
 
 ctrl.sefltest.t = t.test(
       freezing ~ Group,
