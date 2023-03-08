@@ -42,14 +42,17 @@ This entailed the receipt of 3 injections of cocaine (20 mg/kg, ip). No differen
 
 #load  files
 data_vf = read.csv('SEFL7c_vfdata.csv',header=TRUE)
+data_cpp = read.csv('SEFL7c_cppdata.csv',header=TRUE)
 groups = read.csv('SEFL7c_groups.csv',header=TRUE)
 
 #make animal factor
 groups$Animal = factor(groups$Animal)
 data_vf$Animal = factor(data_vf$Animal)
+data_cpp$Animal = factor(data_cpp$Animal)
 
 #add group info to data files
 data_vf = right_join(x=groups,y=data_vf,by="Animal")
+data_cpp = right_join(x=groups,y=data_cpp,by="Animal")
 
 ```
 
@@ -119,6 +122,96 @@ novstressor.shock.stats$GroupInt = droplevels(
 
 ```
 
+# CPP data
+3 chamber cpp was used.
+For tests, after being confined to center for 3 minutes,  animals were allowed to explore all 3 chambers for 10 minutes
+For training, animals were confined to one of two outer chambers for 20 minutes, immed. after receiving 20 mg/kg cocaine, i.p.
+Animals were given two pretests, followed by 4 training sessions (cocaine on either odd or even days).  
+Following 3 post-training test sessions, a final drug-primed session was run
+Training and test sessions were always separated by 1 day.
+
+## subset cpp data
+```{r}
+
+# get overall session data and define drug side
+data_cpp = data_cpp[data_cpp$bin=='all',]
+data_cpp$drugside = data_cpp$left
+data_cpp$drugside[data_cpp$coc_side=='right'] = data_cpp$right[data_cpp$coc_side=='right']
+
+# define session order
+data_cpp$subphase = factor(
+  data_cpp$subphase,
+  levels = c('Pretest1','Pretest2','Training1','Training2','Training3','Training4','ET_1','ET_2','ET_3','Priming Test')
+)
+
+# get cpp pretest/test and training data
+data_cpp.test = data_cpp[data_cpp$phase!='Training',]
+data_cpp.training = data_cpp[data_cpp$phase=='Training',]
+
+#for training days define drug days for each animal
+data_cpp.training$drug = 'sal'
+data_cpp.training$drug[
+  data_cpp.training$coc_trndays=='odd' &
+    (data_cpp.training$subphase=='Training1'|data_cpp.training$subphase=='Training3')
+] = 'coc'
+data_cpp.training$drug[
+  data_cpp.training$coc_trndays=='even' &
+    (data_cpp.training$subphase=='Training2'|data_cpp.training$subphase=='Training4')
+] = 'coc'
+data_cpp.training$drug = factor(data_cpp.training$drug, levels=c('sal','coc'))
+
+#define day bins
+data_cpp.training$days = 'd1to2'
+data_cpp.training$days[data_cpp.training$subphase=='Training3'|data_cpp.training$subphase=='Training4'] = 'd3to4'
+
+```
+
+## get summary stats
+```{r}
+
+#cpp training
+cpp.training.stats = summarise_at(
+  .tbl = group_by(
+    .data = data_cpp.training,
+    days, drug,Group),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('Distance_in')
+)
+
+cpp.training.ANOVA = ezANOVA(
+  data = data_cpp.training,
+  wid = Animal,
+  dv = Distance_in,
+  within = .(drug, days),
+  between = Group,
+  white.adjust = TRUE,
+  detailed = TRUE,
+  type = 3
+)
+cpp.training.ANOVA
+
+#cpp test
+cpp.test.stats = summarise_at(
+  .tbl = group_by(
+    .data = data_cpp.test,
+    subphase, Group),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('drugside')
+)
+
+cpp.test.ANOVA = ezANOVA(
+  data = data_cpp.training,
+  wid = Animal,
+  dv = Distance_in,
+  within = .(subphase),
+  between = Group,
+  white.adjust = TRUE,
+  detailed = TRUE,
+  type = 3
+)
+cpp.test.ANOVA
+
+```
 
 
 # Plots
@@ -137,7 +230,7 @@ p.dim.height = 4.5 #Plot height (in)
 p.dim.dpi = 500 #Plot dpi
 
 #Plot text
-p.textsize.title = 20
+p.textsize.title = 18
 p.textsize.legend =13
 p.textsize.axis.title = 13
 p.textsize.axis.text = 12
@@ -171,7 +264,7 @@ p.legend.position = c(.22,.9)
 #margins
 p.margin1 = unit(c(2, 1.25, 2.45, 2.25), 'cm') 
 p.margin2 = unit(c(2,3.7,2.45,3.7), "cm") 
-p.margin3 =  unit(c(1.2, 4.2, 1.45, 2.25), 'cm')
+p.margin3 =  unit(c(1.3, 3.5, 1.45, 3.5), 'cm')
 
 #base theme
 p.basetheme = theme_bw() + theme(
@@ -479,7 +572,7 @@ p.learning.curves +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_continuous(breaks=1:trials) +
   
-  ggtitle("Theoretical Change\nin Learning Rate") + ylab("% Freezing") + xlab("Day") +
+  ggtitle("Learning\nRate") + ylab("% Freezing") + xlab("Day") +
   
   p.basetheme +
   theme(
@@ -563,7 +656,7 @@ p.learning.curves +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_continuous(breaks=1:trials) +
 
-  ggtitle("Theoretical Change\nin Stimulus Strength") + ylab("% Freezing") + xlab("Day") +
+  ggtitle("Stimulus\nStrength") + ylab("% Freezing") + xlab("Day") +
   
   p.basetheme +
   theme(
@@ -603,6 +696,7 @@ novsts.anova
 ### Separate ANOVA on BL and CS
 ``` {r}
 
+novstressor.cs$subphase = as.character(novstressor.cs$subphase)
 novsts.bl.anova = ezANOVA(
   data = novstressor.cs[novstressor.cs$component=='bl',],
   dv = freezing,
