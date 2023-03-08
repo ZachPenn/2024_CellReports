@@ -857,6 +857,33 @@ trauma.fz.anova = ezANOVA(
 )
 trauma.fz.anova
 
+#comparison of trauma animals' freezing post shock 1
+trauma.fz.ps1.anova = ezANOVA(
+  data = trauma.freezing[
+    trauma.freezing$Group!='NT: veh' & trauma.freezing$component=='postshock01',
+    ],
+  dv = freezing,
+  wid = Animal,
+  white.adjust = TRUE,
+  between = Group,
+  type = 3,
+  detailed = TRUE
+)
+trauma.fz.ps1.anova
+
+trauma.fz.ps10.anova = ezANOVA(
+  data = trauma.freezing[
+    trauma.freezing$Group!='NT: veh' & trauma.freezing$component=='postshock10',
+    ],
+  dv = freezing,
+  wid = Animal,
+  white.adjust = TRUE,
+  between = Group,
+  type = 3,
+  detailed = TRUE
+)
+trauma.fz.ps10.anova
+
 ```
 
 #### SEFL Test Stats
