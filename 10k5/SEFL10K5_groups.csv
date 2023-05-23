@@ -11,7 +11,7 @@ Animal,Exclude,DOB,SurgeryDate,Virus,Region,Group,HistologyNotes,Notes,Recall1,R
 10,0,10/11/22,1/12/22,PSAM,BLA,BLA - PSAM,,,uPSEM,veh,veh,veh
 11,0,10/11/22,1/12/22,PSAM,vHC,vHC - PSAM,,,veh,uPSEM,uPSEM,vHC - uPSEM
 12,0,10/11/22,1/12/22,PSAM,BLA,BLA - PSAM,,,veh,uPSEM,veh,veh
-13,1,10/11/22,1/13/22,PSAM,vHC,vHC - PSAM,,Died during surgical recovery,,,,0
+13,1,10/11/22,1/13/22,PSAM,vHC,vHC - PSAM,,Died during surgical recovery,,,,
 14,1,10/11/22,1/13/22,PSAM,vHC,vHC - PSAM,Very light expression on one side that is more focused laterally,,veh,uPSEM,veh,veh
 15,0,10/11/22,1/13/22,PSAM,BLA,BLA - PSAM,,,uPSEM,veh,uPSEM,BLA - uPSEM
 16,0,10/11/22,1/13/22,PSAM,BLA,BLA - PSAM,Tiniest bit of spread in anterior portion of vCA1 on one side,,veh,uPSEM,uPSEM,BLA - uPSEM
