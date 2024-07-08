@@ -1,5 +1,5 @@
 # Dissociable contributions of the amygdala and ventral hippocampus to stress-induced changes in defensive behavior
-### Pennington ZT, LaBanca AR, Sompolpong P, Christenson Wick Z, Feng Y, Dong Z, Cai DJ (2023)
+### Pennington ZT, LaBanca AR, Sompolpong P, Christenson Wick Z, Feng Y, Francisco TR, Chen L, Fulton SL, Maze I, Dong Z, Cai DJ (2023)
 *Nash Family Department of Neuroscience, Icahn School of Medicine at Mount Sinai*
  
  
@@ -8,7 +8,7 @@ All data and analysis are available here for reproduction and further analysis.
 
 
 ## Analysis files
-All analysis were conducted using RStudio, using the following packages: ggplot2, ez, knitr, tidyr, dplyr, purrr.
+All analysis were conducted using RStudio, using the following packages: ggplot2, ez, tidyr, dplyr, purrr, lmtest, car, knitr.
 
 Each experimental folder has a single analysis file (.rmd).  When the working directory is set to .rmd location, file can be run to load in all experimental data and reproduce analysis/plots.
 
