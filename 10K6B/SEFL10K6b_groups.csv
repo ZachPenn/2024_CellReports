@@ -1,0 +1,27 @@
+Animal,Exclude,DOB,Surgery,Virus,Region,Earmark,SurgeryNotes,Histology,Trec1,Trec2,Trec3,Trec4,Anx1_Test,Anx2_Test,Anx3_Test,Anx4_Test,Anx5_Test,Anx6_Test,Anx1_Drug,Anx2_Drug,Anx3_Drug,Anx4_Drug,Anx5_Drug,Anx6_Drug
+1,0,6/6/23,8/22/23,HM4D,BLA,LT,,Some backflow but nice bilateral amygdala expression,cno,veh,veh,cno,LD,OF,EPM,LD,OF,EPM,veh,veh,cno,cno,cno,veh
+2,0,6/6/23,8/22/23,HM4D,BLA,LB,,,veh,cno,veh,cno,LD,OF,EPM,LD,OF,EPM,cno,veh,veh,veh,cno,cno
+5,0,6/6/23,8/22/23,HM4D,BLA,NP,,Touch of lateral spread but good,cno,veh,veh,cno,LD,EPM,OF,LD,EPM,OF,veh,cno,cno,cno,veh,veh
+6,0,6/6/23,8/22/23,HM4D,BLA,LT,,Some backflow but nice bilateral amygdala expression,veh,cno,veh,cno,LD,EPM,OF,LD,EPM,OF,cno,cno,veh,veh,veh,cno
+9,0,6/6/23,8/22/23,HM4D,BLA,RB,,ipsilateral backflow,veh,cno,cno,veh,EPM,OF,LD,EPM,OF,LD,veh,cno,cno,cno,veh,veh
+11,0,6/6/23,8/22/23,HM4D,BLA,LT,Reinfused one side after clog,,cno,veh,cno,veh,EPM,OF,LD,EPM,OF,LD,cno,cno,veh,veh,veh,cno
+15,0,6/6/23,8/22/23,HM4D,BLA,NP,Injector bent initially on entry by microscope.,,cno,veh,cno,veh,EPM,LD,OF,EPM,LD,OF,cno,cno,veh,veh,veh,cno
+16,0,6/6/23,8/23/23,HM4D,BLA,LT,,,veh,cno,cno,veh,OF,EPM,LD,OF,EPM,LD,veh,veh,cno,cno,cno,veh
+17,0,6/6/23,8/23/23,HM4D,BLA,LB,,Some medial spread to CEA,cno,veh,cno,veh,OF,EPM,LD,OF,EPM,LD,cno,veh,veh,veh,cno,cno
+20,0,6/6/23,8/23/23,HM4D,BLA,NP,,,cno,veh,cno,veh,OF,LD,EPM,OF,LD,EPM,veh,veh,cno,cno,cno,veh
+24,0,6/6/23,8/23/23,HM4D,BLA,RB,,,cno,veh,veh,cno,OF,EPM,LD,OF,EPM,LD,veh,veh,cno,cno,cno,veh
+12,1,6/6/23,8/22/23,HM4D,BLA,LB,Scared mineral oil my have been infused on one side.,unilateral,veh,cno,cno,veh,EPM,LD,OF,EPM,LD,OF,veh,cno,cno,cno,veh,veh
+23,1,6/6/23,8/23/23,HM4D,BLA,RT,,expression really weak on one side and a ton of backflow,veh,cno,veh,cno,OF,LD,EPM,OF,LD,EPM,cno,veh,veh,veh,cno,cno
+26,1,6/6/23,8/24/23,HM4D,BLA,LT,,too medial on one side. Missed,veh,cno,veh,cno,LD,EPM,OF,LD,EPM,OF,cno,cno,veh,veh,veh,cno
+3,0,6/6/23,8/22/23,HM4D,vHC,RT,,,cno,veh,cno,veh,LD,OF,EPM,LD,OF,EPM,veh,veh,cno,cno,cno,veh
+4,0,6/6/23,8/22/23,HM4D,vHC,RB,,,veh,cno,cno,veh,LD,OF,EPM,LD,OF,EPM,cno,veh,veh,veh,cno,cno
+7,0,6/6/23,8/22/23,HM4D,vHC,LB,,,cno,veh,veh,cno,LD,EPM,OF,LD,EPM,OF,veh,cno,cno,cno,veh,veh
+10,0,6/6/23,8/22/23,HM4D,vHC,NP,,,veh,cno,veh,cno,EPM,OF,LD,EPM,OF,LD,veh,cno,cno,cno,veh,veh
+13,0,6/6/23,8/22/23,HM4D,vHC,RT,,expression weak on one side,cno,veh,veh,cno,EPM,OF,LD,EPM,OF,LD,cno,cno,veh,veh,veh,cno
+14,0,6/6/23,8/22/23,HM4D,vHC,RB,,,veh,cno,cno,veh,EPM,LD,OF,EPM,LD,OF,veh,cno,cno,cno,veh,veh
+18,1,6/6/23,8/23/23,HM4D,vHC,RT,,expression almost nonexistant on one side,cno,veh,veh,cno,EPM,LD,OF,EPM,LD,OF,cno,cno,veh,veh,veh,cno
+19,0,6/6/23,8/23/23,HM4D,vHC,RB,,,veh,cno,veh,cno,OF,EPM,LD,OF,EPM,LD,veh,veh,cno,cno,cno,veh
+22,0,6/6/23,8/23/23,HM4D,vHC,LB,,,cno,veh,cno,veh,OF,LD,EPM,OF,LD,EPM,veh,veh,cno,cno,cno,veh
+25,0,6/6/23,8/23/23,HM4D,vHC,NP,,,veh,cno,veh,cno,OF,LD,EPM,OF,LD,EPM,cno,veh,veh,veh,cno,cno
+8,1,6/6/23,8/22/23,HM4D,vHC,RT,,unilateral,veh,cno,cno,veh,LD,EPM,OF,LD,EPM,OF,cno,cno,veh,veh,veh,cno
+21,1,6/6/23,8/23/23,HM4D,vHC,LT,,"weak to no expression on both sides, particularly one",cno,veh,cno,veh,OF,EPM,LD,OF,EPM,LD,cno,veh,veh,veh,cno,cno

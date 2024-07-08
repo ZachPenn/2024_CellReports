@@ -1,0 +1,826 @@
+---
+title: "SEFL10K6b_Analysis"
+author: "Zach"
+output:
+  html_document: 
+    fig_height: 4.5
+    fig_width: 4.5
+    highlight: kate
+    number_sections: yes
+    theme: journal
+    toc: yes
+    toc_depth: 6
+editor_options: 
+  chunk_output_type: console
+---
+
+
+# Set Global Options
+```{r global_options}
+knitr::opts_chunk$set(fig.width=4.5, fig.height=4.5, echo=TRUE, warning=FALSE,message=FALSE)
+```
+
+
+
+# Load Packages 
+```{r}
+library(ggplot2)
+library(ez)
+library(knitr)
+library(tidyr)
+library(lmtest)
+library(car)
+library(dplyr)
+library(purrr)
+```
+
+
+
+# Import Data 
+Note that although trauma recall was first tested on and off cno twice \
+there are carryover effects from prior inhibition in BLA group, seen as reduced freezing in second test.
+In 10K6c, we therefore tested drug effects using between groups design.
+```{r}
+
+#load  files
+data_vf = read.csv('SEFL10K6b_vfdata.csv',header=TRUE)
+data_ld = read.csv('SEFL10K6b_lddata.csv',header=TRUE)
+data_epm = read.csv('SEFL10K6b_epmdata.csv',header=TRUE)
+data_of = read.csv('SEFL10K6b_ofdata.csv',header=TRUE)
+groups = read.csv('SEFL10K6b_groups.csv',header=TRUE)
+
+
+#factorize as necessary
+groups$Animal = factor(groups$Animal)
+data_vf$Animal = factor(data_vf$Animal)
+data_ld$Animal = factor(data_ld$Animal)
+data_of$Animal = factor(data_of$Animal)
+data_epm$Animal = factor(data_epm$Animal)
+data_ld$testnum = as.character(data_ld$testnum)
+data_of$testnum = as.character(data_of$testnum)
+data_epm$testnum = as.character(data_epm$testnum)
+
+
+#get dataframe for drug order
+drug_order = pivot_longer(
+  data = groups[,c('Animal','Trec1','Trec2','Trec3','Trec4','Anx1_Drug','Anx2_Drug','Anx3_Drug','Anx4_Drug','Anx5_Drug','Anx6_Drug')],
+  cols = c('Trec1','Trec2','Trec3','Trec4','Trec1','Trec2','Trec3','Trec4','Anx1_Drug','Anx2_Drug','Anx3_Drug','Anx4_Drug','Anx5_Drug','Anx6_Drug'),
+  names_to = c('TestName'),
+  values_to = 'Drug'
+)
+drug_order$testnum = as.numeric(gsub("\\D", "", drug_order$TestName))
+drug_order$testtype = sapply(drug_order$TestName,function (x) {return(strsplit(x, "[[:digit:]]")[[1]][[1]])})
+
+anxtest_order = pivot_longer(
+  data = groups[,c('Animal','Anx1_Test','Anx2_Test','Anx3_Test','Anx4_Test','Anx5_Test','Anx6_Test')],
+  cols = c('Anx1_Test','Anx2_Test','Anx3_Test','Anx4_Test','Anx5_Test','Anx6_Test'),
+  names_to = c('TestName'),
+  values_to = 'Test'
+)
+anxtest_order$testnum = as.numeric(gsub("\\D", "", anxtest_order$TestName))
+anxtest_order$testtype = sapply(anxtest_order$TestName,function (x) {return(strsplit(x, "[[:digit:]]")[[1]][[1]])})
+
+order_info = left_join(
+  subset(drug_order, select=-c(TestName)),
+  subset(anxtest_order, select=-c(TestName)), 
+  by=c('Animal','testtype','testnum')
+)
+order_info$Test[order_info$testtype=='Trec'] = 'Trec'
+order_info$Drug = factor(order_info$Drug, levels = c('veh','cno'))
+order_info$testnum = as.character(order_info$testnum)
+
+
+#add group info to data files
+data_vf = inner_join(x=groups,y=data_vf,by="Animal")
+data_ld = inner_join(x=groups,y=data_ld,by="Animal")
+data_epm = inner_join(x=groups,y=data_epm,by="Animal")
+data_of = inner_join(x=groups,y=data_of,by="Animal")
+
+#add drug order 
+data_vf = left_join(x=data_vf, y=order_info[order_info$Test=='Trec',], by=c('Animal'='Animal','subphase'='testnum'))
+data_ld = left_join(x=data_ld, y=order_info[order_info$Test=='LD',], by=c('Animal'='Animal','testnum'='testnum'))
+data_epm = left_join(x=data_epm, y=order_info[order_info$Test=='EPM',], by=c('Animal'='Animal','testnum'='testnum'))
+data_of = left_join(x=data_of, y=order_info[order_info$Test=='OF',], by=c('Animal'='Animal','testnum'='testnum'))
+
+```
+
+
+
+# Drop subjects
+See `groups` dataframe for exclusion rationale.
+```{r}
+
+data_vf = data_vf[data_vf$Exclude!=1,]
+data_ld = data_ld[data_ld$Exclude!=1,]
+data_epm = data_epm[data_epm$Exclude!=1,]
+data_of = data_of[data_of$Exclude!=1,]
+
+```
+
+
+
+# Subset data
+Separate phases (trauma, trauma recall, etc) are placed in unique dataframes for ease of analysis.
+```{r}
+
+#trauma data
+trauma.freezing = data_vf[data_vf$phase=='trauma' & data_vf$subphase!="shock",]
+
+
+#trauma shock reactivity
+trauma.shockreact = summarise_at(
+  .tbl = group_by(
+    .data = data_vf[data_vf$phase=='trauma' & data_vf$subphase!="postshock",],
+    Animal, subphase, Region),
+  .funs = list(motion=mean),
+  .vars = c('motion')
+)
+
+
+#trauma test data
+traumatest = data_vf[data_vf$phase=='traumatest' & data_vf$component=='avg',]
+traumatest$pair = 1
+traumatest$pair[traumatest$subphase>2]=2
+
+#Collapse ld data
+data_ld = data_ld[data_ld$bin<5,]
+ld.collapsed = summarize_at(
+  .tbl = group_by(data_ld, Animal, Region, Drug, testnum),
+  .funs = list(mean),
+  .vars = c('dark','Distance_in'))
+ld.collapsed$test = 1
+ld.collapsed$test[ld.collapsed$testnum>3] = 2
+
+
+#Collapse epm data
+data_epm = data_epm[data_epm$bin<5,]
+data_epm$closed = data_epm$c1 + data_epm$c2
+epm.collapsed = summarize_at(
+  .tbl = group_by(data_epm, Animal, Region, Drug, testnum),
+  .funs = list(mean),
+  .vars = c('closed','Distance_in'))
+epm.collapsed$test = 1
+epm.collapsed$test[epm.collapsed$testnum>3] = 2
+
+#Collapse of data
+data_of = data_of[data_of$bin<5,]
+of.collapsed = summarize_at(
+  .tbl = group_by(data_of, Animal, Region, Drug, testnum),
+  .funs = list(mean),
+  .vars = c('DstFrmCnt_in','Distance_in'))
+of.collapsed$test = 1
+of.collapsed$test[of.collapsed$testnum>3] = 2
+
+```
+
+
+
+# Get summary statistics for plotting
+Calculate relevant means and std. errors.
+```{r}
+
+#trauma session freezing
+trauma.freezing.stats = summarise_at(
+  .tbl = group_by(
+    .data = trauma.freezing,
+    component, Region),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('motion','freezing')
+)
+trauma.freezing.stats$subphase = 'postshock'
+trauma.freezing.stats$subphase[trauma.freezing.stats$component=='baseline'] = 'baseline'
+
+#trauma shock reactivity
+trauma.shockreact.stats = summarise_at(
+  .tbl = group_by(
+    .data = trauma.shockreact,
+    subphase, Region),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('motion')
+)
+
+
+#trauma test
+traumatest.stats = summarise_at(
+  .tbl = group_by(
+    .data = traumatest,
+    Region, component, Drug, pair),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('freezing','motion')
+)
+
+
+#ld stats
+ld.stats = summarise_at(
+  .tbl = group_by(
+    .data = ld.collapsed,
+    Region, Drug),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('dark','Distance_in'))
+
+
+#epm stats
+epm.stats = summarise_at(
+  .tbl = group_by(
+    .data = epm.collapsed,
+    Region, Drug),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('closed','Distance_in'))
+
+
+#of stats
+of.stats = summarise_at(
+  .tbl = group_by(
+    .data = of.collapsed,
+    Region, Drug),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('DstFrmCnt_in','Distance_in'))
+
+
+```
+
+
+
+# Plots
+## Global Plot Parameters
+```{r}
+
+#set figure file prefix
+f_pfx = '10k6b'
+
+#ggsave
+p.save = TRUE
+
+#Plot dimensions
+p.dim.width = 4.5 #Plot width (in)
+p.dim.height = 4.5 #Plot height (in)
+p.dim.dpi = 500 #Plot dpi
+
+#Plot text
+p.textsize.title = 20
+p.textsize.legend =10
+p.textsize.axis.title = 13
+p.textsize.axis.text = 12
+
+#Plot colors
+p.scale.colour = c("red3", "royalblue3")
+p.scale.fill = c("red3", "royalblue3")
+
+#Plot line dimensions
+p.line.data.size = 1
+p.line.axis.size = .5
+p.line.bar.size = .7
+p.line.error.size = .75
+p.line.ind.size = .6
+p.line.ind.alpha = .3
+
+#Widths
+p.width.bar = .8
+p.width.jitter = .3
+p.width.error = .5
+
+#Point/dot sizes
+p.point.shape = 21
+p.point.size = 4
+p.point.stroke = 1
+p.dot.size = 2.5
+p.dot.shape = 21
+p.dot.alpha = .3
+
+#p.margin
+p.margin1 = unit(c(2, 3, 1.6, 3), "cm")
+p.margin2 = unit(c(2, 3.6, 2.2, 3.6), "cm")
+p.margin3 = unit(c(2, 3.25, 2.45, 3.25), "cm") #for trauma
+
+#base theme
+p.basetheme = theme_bw() + theme(
+    panel.grid = element_blank(), 
+    panel.border = element_rect(colour = "white", size=.75),
+    strip.text = element_text(size=p.textsize.title-2, face="bold"),
+    strip.background = element_rect(color=NA, fill=NA),
+    axis.line = element_line(color="black", size = p.line.axis.size),
+    axis.title = element_text(size=p.textsize.axis.title, face="bold"),
+    axis.title.x = element_blank(),
+    axis.text= element_text(size=p.textsize.axis.text,colour="black"),
+    axis.text.x= element_text(
+      size=p.textsize.axis.title,
+      face='bold',
+      angle = -90,
+      hjust = 0,
+      vjust=.5,
+      margin=margin(b=10,t=5)),
+    plot.background = element_rect(fill = "transparent",colour = NA),
+    plot.margin = p.margin1
+  ) 
+
+#predefine partial function for saving plots
+saveplot = partial(
+  ggsave,
+  width = p.dim.width,
+  height = p.dim.height,
+  units = "in",
+  dpi = p.dim.dpi,
+  bg = 'transparent'
+)
+
+```
+
+
+
+## Make Plots
+### Trauma
+#### Freezing
+```{r, fig.width=4.5, fig.height=4.5}
+
+
+#Create base layer from group level data
+P.Trauma.Freezing = ggplot(
+  data = trauma.freezing.stats,
+  aes(x=component,
+      y=freezing_mean,
+      fill=Region,
+      shape=Region,
+      group=interaction(subphase,Region)))
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 100
+p.yint = 25
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot
+P.Trauma.Freezing  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = freezing_mean - freezing_sem,
+        ymax = freezing_mean + freezing_sem,
+        width = p.width.error
+        )) +
+  
+  geom_line(
+    stat="identity",
+    linewidth = p.line.data.size
+  ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    shape = p.point.shape,
+    stroke = p.point.stroke
+  ) +
+  
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  scale_x_discrete(labels=c('bl','1','2','3','4','5','6','7','8','9','10')) +
+  
+  labs(
+    #title = "Trauma",
+    x = "Shock",
+    y = "% Freezing"
+  ) +
+  
+  p.basetheme +
+  theme(
+    plot.title = element_text(margin=margin(b=25,t=5)),
+    axis.title.x = element_text(margin=margin(t=-3)),
+    axis.text.x= element_text(
+      size=p.textsize.axis.title-2,
+      face='plain',
+      angle = 0,
+      vjust=.5),
+    legend.position = c(.9,.23),
+    plot.margin = p.margin3
+  )
+
+#if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma.tiff", sep = '_'))}
+
+```
+
+
+
+## Light dark
+### Dark side
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.LD.dark = ggplot(
+  data = ld.stats,
+  aes(x=Drug,
+      y=dark_mean,
+      fill=Region,
+      group=Region)) 
+
+#Define plot specific parameters
+p.ymin = .4
+p.ymax = 1
+p.yint = .2
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot 
+P.LD.dark  +
+  
+  geom_crossbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = dark_mean - dark_sem,
+        ymax = dark_mean + dark_sem,),
+    width = p.width.bar,
+    show.legend = FALSE) +
+  
+  geom_line(
+      data = ld.collapsed,
+      aes(
+        x = Drug,
+        y = dark,
+        group = Animal
+      ),
+    alpha = p.line.ind.alpha,
+    size = p.line.ind.size,
+    color = 'black'
+  ) +
+  
+  geom_hline(yintercept = .5, linetype='dashed') +
+  
+  facet_grid(cols = vars(Region)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
+
+  labs(y = "% Time in Dark") +
+  p.basetheme 
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "LD_Dark.tiff", sep = '_'))}
+
+```
+
+
+## Open field
+### Center 
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.OF.cnt = ggplot(
+  data = of.stats,
+  aes(x=Drug,
+      y=DstFrmCnt_in_mean,
+      fill=Region,
+      group=Region)) 
+
+#Define plot specific parameters
+p.ymin = 7
+p.ymax = 9
+p.yint = .5
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot 
+P.OF.cnt  +
+  
+  geom_crossbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = DstFrmCnt_in_mean - DstFrmCnt_in_sem,
+        ymax = DstFrmCnt_in_mean + DstFrmCnt_in_sem),
+    width = p.width.bar,
+    show.legend = FALSE) +
+  
+  geom_line(
+    data = of.collapsed,
+    aes(
+      x = Drug,
+      y = DstFrmCnt_in,
+      group = Animal
+    ),
+    alpha = p.line.ind.alpha,
+    size = p.line.ind.size,
+    color = 'black'
+  ) +
+
+  facet_grid(cols = vars(Region)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks, expand = c(0, 0)) +
+  
+  labs(y = "Distance From Center (in)") +
+  p.basetheme 
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "OF_Cnt.tiff", sep = '_'))}
+
+```
+
+
+## EPM
+
+### Closed arms
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.EPM.cls = ggplot(
+  data = epm.stats,
+  aes(x=Drug,
+      y=closed_mean,
+      fill=Region,
+      group=Region)) 
+
+#Define plot specific parameters
+p.ymin = .2
+p.ymax = 1
+p.yint = .2
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot 
+P.EPM.cls  +
+  
+  geom_crossbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = closed_mean - closed_sem,
+        ymax = closed_mean + closed_sem,),
+    width = p.width.bar,
+    show.legend = FALSE) +
+  
+  geom_line(
+      data = epm.collapsed,
+      aes(
+        x = Drug,
+        y = closed,
+        group = Animal
+      ),
+    alpha = p.line.ind.alpha,
+    size = p.line.ind.size,
+    color = 'black'
+  ) +
+  
+  geom_hline(yintercept = .5, linetype='dashed') +
+  
+  facet_grid(cols = vars(Region)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
+  
+  labs(y = "% Time in Closed") +
+  p.basetheme 
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "EPM_Cls.tiff", sep = '_'))}
+
+```
+
+
+
+
+
+# Stats
+### Sidak correction
+```{r}
+
+#Dunn-Sidak pcrit with 2 posthoc
+comparisons = 2
+pcrit_2 = 1 - (1 - .05)^(1/comparisons) 
+#Dunn-Sidak pcrit with 4 posthoc
+comparisons = 4
+pcrit_4 = 1 - (1 - .05)^(1/comparisons)
+
+```
+
+
+### trauma
+```{r}
+
+trauma.fz.anova = ezANOVA(
+  data = trauma.freezing,
+  dv = freezing,
+  wid = Animal,
+  within = component,
+  white.adjust = TRUE,
+  between = Region,
+  type = 3,
+  detailed = TRUE
+)
+trauma.fz.anova
+
+```
+
+### trauma recall
+```{r}
+
+traumatest.anova = ezANOVA(
+  data = traumatest,
+  dv = freezing,
+  wid = Animal,
+  within = .(Drug),
+  white.adjust = TRUE,
+  between = Region,
+  type = 3,
+  detailed = TRUE
+)
+traumatest.anova
+
+```
+
+
+
+### Light Dark Stats
+#### Dark side time
+```{r}
+
+#comparison of time in dark side
+ld.dark.anova = ezANOVA(
+  data = ld.collapsed,
+  dv = dark,
+  wid = Animal,
+  within = Drug,
+  between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+ld.dark.anova
+
+#vHC only
+ld.dark.vhc.anova = ezANOVA(
+  data = ld.collapsed[ld.collapsed$Region=='vHC',],
+  dv = dark,
+  wid = Animal,
+  within = Drug,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+ld.dark.vhc.anova
+
+#BLA only
+ld.dark.bla.anova = ezANOVA(
+  data = ld.collapsed[ld.collapsed$Region=='BLA',],
+  dv = dark,
+  wid = Animal,
+  within = Drug,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+ld.dark.bla.anova
+
+```
+
+#### Distance travelled
+```{r}
+
+#comparison of time in dark side
+ld.dist.anova = ezANOVA(
+  data = ld.collapsed,
+  dv = Distance_in,
+  wid = Animal,
+  within = Drug,
+  between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+print(ld.dist.anova)
+
+
+```
+
+
+### EPM Stats
+#### closed side time
+```{r}
+
+#comparison of time in closed arms
+epm.closed.anova = ezANOVA(
+  data = epm.collapsed,
+  dv = closed,
+  wid = Animal,
+  within = Drug,
+  between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+epm.closed.anova
+
+#veh only
+epm.closed.veh.anova = ezANOVA(
+  data = epm.collapsed[epm.collapsed$Drug=='veh',],
+  dv = closed,
+  wid = Animal,
+  #within = Drug,
+  between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+epm.closed.veh.anova
+
+
+#bla only
+epm.closed.bla.anova = ezANOVA(
+  data = epm.collapsed[epm.collapsed$Region=='BLA',],
+  dv = closed,
+  wid = Animal,
+  within = Drug,
+  #between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+epm.closed.bla.anova
+
+```
+
+#### distance
+```{r}
+
+#comparison of distance travelled
+epm.dist.anova = ezANOVA(
+  data = epm.collapsed,
+  dv = Distance_in,
+  wid = Animal,
+  within = Drug,
+  between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+epm.dist.anova
+
+
+```
+
+
+### OF Stats
+#### Average distance from walls
+```{r}
+
+#comparison of time in closed arms
+of.ctr.anova = ezANOVA(
+  data = of.collapsed,
+  dv = DstFrmCnt_in,
+  wid = Animal,
+  within = Drug,
+  between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+of.ctr.anova
+
+#vhc
+of.ctr.vhc.anova = ezANOVA(
+  data = of.collapsed[of.collapsed$Region=='vHC',],
+  dv = DstFrmCnt_in,
+  wid = Animal,
+  within = Drug,
+  #between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+of.ctr.vhc.anova
+
+#bla
+of.ctr.bla.anova = ezANOVA(
+  data = of.collapsed[of.collapsed$Region=='BLA',],
+  dv = DstFrmCnt_in,
+  wid = Animal,
+  within = Drug,
+  #between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+of.ctr.bla.anova
+
+
+```
+
+#### distance
+```{r}
+
+#comparison of distance travelled
+of.dist.anova = ezANOVA(
+  data = of.collapsed,
+  dv = Distance_in,
+  wid = Animal,
+  within = Drug,
+  between = Region,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+of.dist.anova
+
+
+```

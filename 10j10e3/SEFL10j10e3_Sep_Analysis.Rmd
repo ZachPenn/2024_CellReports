@@ -279,7 +279,7 @@ freezing.df = right_join(
 f_pfx = '10j10e3sep'
 
 #ggsave
-p.save = FALSE
+p.save = TRUE
 
 #Plot dimensions
 p.dim.width = 4.5 #Plot width (in)
@@ -346,7 +346,7 @@ p.basetheme = theme_bw() + theme(
       size=p.textsize.axis.title,
       face='bold',
       angle = -90,
-      hjust = 0,
+      hjust = .5,
       vjust=.5,
       margin=margin(b=10,t=5)),
     legend.position = c(.3,.85),
@@ -964,7 +964,7 @@ P.retrain = ggplot(
     stroke = p.point.stroke
   ) +
   
-  scale_fill_manual(values=p.scale.colour) +
+  scale_fill_manual(values=c('white','red4')) +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('bl','1','2','3','4','5','6','7','8','9','10')) +
@@ -1041,7 +1041,7 @@ P.retrain_test = ggplot(
       ymax = freezing_mean + freezing_sem,
       width = p.width.error)) +
   
-  scale_fill_manual(values=p.scale.colour) +
+  scale_fill_manual(values=c('white','red4')) +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
 
@@ -1746,6 +1746,17 @@ ld.dark.posthoc
 ### Retrain stats
 ```{r}
 
+retrain.bl.anova = ezANOVA(
+    data = retrain[retrain$subphase=='bl',],
+    dv = freezing,
+    wid = Animal,
+    between = Group,
+    white.adjust = TRUE,
+    type = 3,
+    return_aov = TRUE
+  )
+retrain.bl.anova
+
 retrain.anova = ezANOVA(
     data = retrain[retrain$subphase!='bl',],
     dv = freezing,
@@ -1758,24 +1769,13 @@ retrain.anova = ezANOVA(
   )
 retrain.anova
 
-retrain.bl.anova = ezANOVA(
-    data = retrain[retrain$component=='bl',],
-    dv = freezing,
-    wid = Animal,
-    between = Group,
-    white.adjust = TRUE,
-    type = 3,
-    return_aov = TRUE
-  )
-retrain.bl.anova
-
-ezANOVA(
+retrain_test.anova = ezANOVA(
   wid = Animal,
   data = retrain_test,
   dv = freezing,
   between = Group,
-  #white.adjust = TRUE,
-  #type = 3,
+  white.adjust = TRUE,
+  type = 3,
   return_aov = TRUE
 )
 retrain_test.anova

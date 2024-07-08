@@ -1,0 +1,41 @@
+Animal,DOB,Sex,Box,Trauma,Drug_0,Drug_48,Group
+1,,M,1,NT,veh,veh,NT: veh
+2,,M,2,T,veh,ANI,T: ani (del.)
+3,,M,3,T,ANI,veh,T: ani (imm.)
+4,,M,4,T,veh,ANI,T: ani (del.)
+5,,M,1,T,veh,ANI,T: ani (del.)
+6,,M,2,NT,veh,veh,NT: veh
+7,,M,3,T,veh,veh,T: veh
+8,,M,4,T,ANI,veh,T: ani (imm.)
+9,,M,1,T,ANI,veh,T: ani (imm.)
+10,,M,2,T,veh,veh,T: veh
+11,,M,3,NT,veh,veh,NT: veh
+12,,M,4,T,veh,veh,T: veh
+13,,M,1,T,veh,veh,T: veh
+14,,M,2,T,ANI,veh,T: ani (imm.)
+15,,M,3,T,veh,ANI,T: ani (del.)
+16,,M,4,NT,veh,veh,NT: veh
+17,,M,1,NT,veh,veh,NT: veh
+18,,M,2,T,veh,ANI,T: ani (del.)
+19,,M,3,T,veh,veh,T: veh
+20,,M,4,T,ANI,veh,T: ani (imm.)
+21,,F,1,NT,veh,veh,NT: veh
+22,,F,2,T,veh,ANI,T: ani (del.)
+23,,F,3,T,ANI,veh,T: ani (imm.)
+24,,F,4,T,veh,veh,T: veh
+25,,F,1,T,veh,ANI,T: ani (del.)
+26,,F,2,NT,veh,veh,NT: veh
+27,,F,3,T,veh,veh,T: veh
+28,,F,4,T,ANI,veh,T: ani (imm.)
+29,,F,1,T,ANI,veh,T: ani (imm.)
+30,,F,2,T,veh,veh,T: veh
+31,,F,3,NT,veh,veh,NT: veh
+32,,F,4,T,veh,ANI,T: ani (del.)
+33,,F,1,T,veh,veh,T: veh
+34,,F,2,T,ANI,veh,T: ani (imm.)
+35,,F,3,T,veh,ANI,T: ani (del.)
+36,,F,4,NT,veh,veh,NT: veh
+37,,F,1,T,ANI,veh,T: ani (imm.)
+38,,F,2,T,veh,veh,T: veh
+39,,F,3,T,veh,ANI,T: ani (del.)
+40,,F,4,NT,veh,veh,NT: veh

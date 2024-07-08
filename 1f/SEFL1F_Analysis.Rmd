@@ -1,0 +1,1133 @@
+---
+title: "SEFL1F_Analysis"
+author: "Zach"
+output:
+  html_document: 
+    fig_height: 4.5
+    fig_width: 4.5
+    highlight: kate
+    number_sections: yes
+    theme: journal
+    toc: yes
+    toc_depth: 6
+editor_options: 
+  chunk_output_type: console
+---
+
+
+# Set Global Options
+```{r global_options}
+knitr::opts_chunk$set(fig.width=4.5, fig.height=4.5, echo=TRUE, warning=FALSE,message=FALSE)
+```
+
+
+
+# Load Packages 
+```{r}
+library(ggplot2)
+library(ez)
+library(knitr)
+library(tidyr)
+library(dplyr)
+library(purrr)
+```
+
+
+
+# Import Data 
+Load  files and factorize as necessary.
+```{r}
+
+#load  files
+data_vf = read.csv('SEFL1F_vfdata.csv',header=TRUE)
+groups = read.csv('SEFL1F_groups.csv',header=TRUE)
+
+
+#make animal factor
+groups$Animal = factor(groups$Animal)
+data_vf$Animal = factor(data_vf$Animal)
+
+
+#add group info to data files
+data_vf = right_join(x=groups,y=data_vf,by="Animal")
+
+```
+
+
+
+
+# Drop excluded subjects
+See `groups` dataframe for exclusion rationale.
+Note that there were 2 animals that generalized slighly when first placed in 
+environment of novel stressor (~10%). If these animals are excluding, the same
+pattern of results is observed.
+```{r}
+
+#data_vf = data_vf[data_vf$Exclude!=1,]
+
+```
+
+
+
+# Subset data
+Separate phases (trauma, trauma recall, etc) are placed in unique dataframes for ease of analysis.
+```{r}
+
+# trauma data
+## freezing
+trauma.freezing = data_vf[data_vf$phase=='trauma' & data_vf$subphase!="shock",]
+## trauma shock reactivity
+trauma.shockreact = summarise_at(
+  .tbl = group_by(
+    .data = data_vf[data_vf$phase=='trauma' & data_vf$subphase!="postshock",],
+    Animal,subphase, Trauma),
+  .funs = list(motion=mean),
+  .vars = c('motion')
+)
+
+
+#trauma test
+traumatest = data_vf[data_vf$phase=='traumatest' & data_vf$subphase=='avg',]
+
+
+#weakshock data
+##prepost startle stimulus
+wshock.prepost = data_vf[data_vf$phase=='weakshock' & data_vf$subphase=='prepost',]
+wshock.prepost$component = factor(wshock.prepost$component, levels=c('bl','post'))
+
+##startle response
+wshock.startle = data_vf[data_vf$phase=='weakshock' & data_vf$subphase=='shock',]
+wshock.startle$component = factor(
+  wshock.startle$component,
+  levels=c('shock_pre','shock_shock','shock_post'))
+wshock.startle = summarise_at(
+  .tbl = group_by(
+    .data = wshock.startle,
+    Animal, Trauma, component),
+  .funs = list(motion=mean),
+  .vars = c('motion')
+)
+
+#define each animal's asymptote
+wshock.asym = summarise_at(
+  .tbl = group_by(
+    .data = wshock.prepost[
+      wshock.prepost$component=='bl' & wshock.prepost$day>2,
+      ],
+    Animal),
+  .funs = list(asym=mean),
+  .vars = c('freezing')
+)
+wshock.prepost = right_join(wshock.prepost, wshock.asym, by='Animal')
+
+#define freezing as pct asymptote
+wshock.prepost$pctasym = (wshock.prepost$freezing / wshock.prepost$asym)*100
+
+```
+
+
+
+# Get summary statistics for plotting
+Calculate relevant means and std. errors.
+```{r}
+
+#trauma session freezing
+trauma.freezing.stats = summarise_at(
+  .tbl = group_by(
+    .data = trauma.freezing,
+    subphase, component, Trauma),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('motion','freezing')
+)
+
+#trauma shock reactivity
+trauma.shockreact.stats = summarise_at(
+  .tbl = group_by(
+    .data = trauma.shockreact,
+    subphase, Trauma),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('motion')
+)
+
+
+#trauma test
+traumatest.stats = summarise_at(
+  .tbl = group_by(
+    .data = traumatest,
+    Trauma),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('freezing','motion')
+)
+
+
+#weak shock
+#pre/post
+wshock.prepost.stats = summarise_at(
+  .tbl = group_by(
+    .data = wshock.prepost,
+    #day, component, Trauma, Batch),
+    day, component, Trauma),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('freezing','motion','pctasym')
+)
+
+#weak shock startle
+wshock.startle.stats = summarise_at(
+  .tbl = group_by(
+    .data = wshock.startle,
+    component, Trauma),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('motion')
+)
+
+
+```
+
+
+# Plots
+## Global Plot Parameters
+```{r}
+
+#set figure file prefix
+f_pfx = '1F'
+
+#ggsave
+p.save = TRUE
+
+#Plot dimensions
+p.dim.width = 4.5 #Plot width (in)
+p.dim.height = 4.5 #Plot height (in)
+p.dim.dpi = 500 #Plot dpi
+
+#Plot text
+p.textsize.title = 18
+p.textsize.legend =13
+p.textsize.axis.title = 13
+p.textsize.axis.text = 12
+
+#Plot colors
+p.scale.colour = c("gray28","gray100")
+p.scale.fill = c("gray28","gray100")
+p.scale.fill.sex = c("white",'blue3')
+
+#Plot line dimensions
+p.line.data.size = 1
+p.line.axis.size = .5
+p.line.bar.size = .7
+p.line.error.size = .75
+
+#Widths
+p.width.bar = .7
+p.width.jitter = .3
+p.width.error = .5
+
+#Point/dot sizes
+p.point.shape = 21
+p.point.size = 4
+p.point.stroke = 1
+p.dot.size = 2.5
+p.dot.shape = 21
+p.dot.alpha = .25
+
+
+#Plot line dimensions
+p.line.data.size = 1
+p.line.axis.size = .5
+p.line.bar.size = .7
+p.line.error.size = .75
+
+#Widths
+p.width.bar = .8
+p.width.jitter = .3
+p.width.error = .5
+
+#Point/dot sizes
+p.point.shape = 21
+p.point.size = 4
+p.point.stroke = 1
+p.dot.size = 2.5
+p.dot.shape = 21
+p.dot.alpha = .3
+
+#p.margin
+p.margin1 = plot.margin = unit(c(2, 3.6, 2.2, 3.6), "cm")
+p.margin2 = unit(c(2, 3.25, 2.45, 3.25), "cm") 
+p.margin3 =  unit(c(1.3, 3.5, 1.45, 3.5), 'cm')
+p.margin4 =  unit(c(1.3, 4, 1.45, 4), 'cm')
+
+#base theme
+p.basetheme = theme_bw() + theme(
+    panel.grid = element_blank(), 
+    panel.border = element_rect(colour = "white"),
+    axis.line = element_line(color="black", size = p.line.axis.size),
+    plot.title = element_text(
+      size=p.textsize.title, 
+      hjust=.5, margin=margin(b=12,t=0), 
+      face="bold"),
+    axis.title = element_text(size=p.textsize.axis.title, face="bold"),
+    axis.title.x = element_text(margin=margin(t=-1)),
+    axis.text= element_text(size=p.textsize.axis.text,colour="black"),
+    axis.text.x= element_text(
+      size=p.textsize.axis.title,
+      face='plain',
+      angle = 0,
+      vjust=.5,
+      margin = margin(b=10,t=5)
+      ),
+    legend.position = 'right',
+    legend.title = element_blank(),
+    legend.text = element_text(size=p.textsize.legend, face="bold"),
+    legend.key = element_rect(colour=NA,fill=NA),
+    legend.background = element_rect(fill=NA),
+    plot.background = element_rect(fill = "transparent",colour = NA),
+    plot.margin = p.margin1
+  ) 
+
+#predefine partial function for saving plots
+saveplot = partial(
+  ggsave,
+  width = p.dim.width,
+  height = p.dim.height,
+  units = "in",
+  dpi = p.dim.dpi,
+  bg = 'transparent'
+)
+
+```
+
+
+## Make Plots
+### Trauma
+#### Freezing
+```{r, fig.width=4.5, fig.height=4.5}
+
+
+#Create base layer from group level data
+P.Trauma.Freezing = ggplot(
+  data = trauma.freezing.stats,
+  aes(x=component,
+      y=freezing_mean,
+      fill=Trauma,
+      group=interaction(subphase,Trauma)))
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 100
+p.yint = 25
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot
+P.Trauma.Freezing  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    aes(ymin = freezing_mean - freezing_sem,
+        ymax = freezing_mean + freezing_sem,
+        width = p.width.error
+        )) +
+  
+  geom_line(
+    stat="identity",
+    linewidth = p.line.data.size
+  ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    stroke = p.point.stroke,
+    shape = p.point.shape
+  ) +
+  
+  #scale_shape_manual(values=p.point.shape) +
+  scale_shape_manual(values=c(21,24)) +
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  scale_x_discrete(labels=c('bl','1','2','3','4','5','6','7','8','9','10')) +
+  
+  labs(
+    x = "Shock",
+    y = "% Freezing"
+  ) +
+  
+  p.basetheme +
+  theme(
+    plot.title = element_text(margin=margin(b=25,t=5)),
+    axis.title.x = element_text(margin=margin(t=-3)),
+    axis.text.x= element_text(
+      size=p.textsize.axis.title-2,
+      face='plain',
+      angle = 0,
+      vjust=.5),
+    legend.position = c(.2, .9),
+    plot.margin = p.margin2
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma.tiff", sep = '_'))}
+
+```
+
+
+
+#### Shock Reactivity
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.Trauma.Shock = ggplot(
+  data = trauma.shockreact.stats,
+  aes(x=subphase,
+      y=mean,
+      fill=Trauma,
+      group=Trauma)) 
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 1600
+p.yint = 400
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot
+P.Trauma.Shock  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = mean - sem,
+        ymax = mean + sem,
+        width = p.width.error)) +
+  
+  geom_line(
+    stat="identity",
+    size = p.line.data.size
+  ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    shape = p.point.shape,
+    stroke = p.point.stroke,
+    show.legend = FALSE
+  ) +
+  
+  scale_shape_manual(values=c(21,24)) +
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  
+  labs(
+    x = "",
+    y = "Motion (au)"
+  ) +
+  
+  p.basetheme +
+  theme(
+    legend.position = c(.4,.85),
+    plot.margin = p.margin2
+  )
+
+#if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma_ShockReact.tiff", sep = '_'))}
+
+
+```
+
+
+
+### Trauma Recall
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.TraumaTest = ggplot(
+  data = traumatest.stats,
+  aes(x=Trauma,
+      y=freezing_mean,
+      fill=Trauma,
+      group=Trauma)) 
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 100
+p.yint = 25
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot
+P.TraumaTest  +
+  
+  geom_bar(
+    stat="identity",
+    colour = 'black',
+    position=position_dodge(),
+    size=p.line.bar.size,
+    width=p.width.bar,
+    show.legend = FALSE) +
+  
+    geom_jitter(
+      data = traumatest,
+      aes(x=Trauma,
+          y=freezing),
+      width = p.width.bar * p.width.jitter,
+      height = 0,
+      shape = p.dot.shape,
+      size = p.dot.size,
+      colour = 'black',
+      fill=NA,
+      alpha = p.dot.alpha,
+      show.legend=FALSE
+    ) +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = freezing_mean - freezing_sem,
+        ymax = freezing_mean + freezing_sem,
+        width = p.width.error)) +
+  
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+
+  labs(
+    x = "",
+    y = "% Freezing"
+  ) +
+  
+  p.basetheme
+
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "TraumaRecall.tiff", sep = '_'))}
+
+```
+
+
+### Weak Shock
+
+#### Day 1
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.wshock1 = ggplot(
+  data = wshock.prepost.stats[
+    wshock.prepost.stats$day==1 & wshock.prepost.stats$component=='bl',
+    ],
+  aes(x=Trauma,
+      y=freezing_mean,
+      fill=Trauma,
+      group=Trauma)) 
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 30
+p.yint = 10
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot
+P.wshock1  +
+  
+  geom_bar(
+    stat="identity",
+    colour = 'black',
+    position=position_dodge(),
+    size=p.line.bar.size,
+    width=p.width.bar,
+    show.legend = FALSE) +
+  
+    geom_jitter(
+      data = wshock.prepost[
+        wshock.prepost$day==1 & wshock.prepost$component=='bl',
+        ],
+      aes(x=Trauma,
+          y=freezing),
+      width = p.width.bar * p.width.jitter,
+      height = 0,
+      shape = p.dot.shape,
+      size = p.dot.size,
+      colour = 'black',
+      fill=NA,
+      alpha = p.dot.alpha,
+      show.legend=FALSE
+    ) +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = freezing_mean - freezing_sem,
+        ymax = freezing_mean + freezing_sem,
+        width = p.width.error)) +
+  
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+
+  labs(
+    x = "",
+    y = "% Freezing"
+  ) +
+  
+  p.basetheme 
+
+
+#if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Wshock1.tiff", sep = '_'))}
+
+```
+
+#### BL Freezing
+```{r, fig.width=4.5, fig.height=4.5}
+
+
+component = 'bl'
+
+#Create base layer from group level data
+P.wshock.bl = ggplot(
+  data = wshock.prepost.stats[
+    wshock.prepost.stats$component==component,
+  ],
+  aes(x=day,
+      y=freezing_mean,
+      fill=Trauma,
+      group=Trauma))
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 20
+p.yint = 5
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot
+P.wshock.bl  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    #colour = "black",
+    aes(ymin = freezing_mean - freezing_sem,
+        ymax = freezing_mean + freezing_sem,
+        width = p.width.error
+        )) +
+  
+  geom_line(
+    stat="identity",
+    linewidth = p.line.data.size
+  ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    stroke = p.point.stroke,
+    shape = p.point.shape,
+    show.legend = FALSE
+  ) +
+
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  scale_x_continuous(breaks=1:7, expand = c(0,.5)) +
+  
+  labs(
+    title = "\n",
+    x = "Day",
+    y = "% Freezing"
+  ) +
+  
+  p.basetheme +
+  theme(
+     plot.margin = p.margin3,
+     axis.text.x = element_text(angle=0, face='plain'),
+     legend.direction = 'horizontal',
+     legend.position = c(.5,.95)
+  ) 
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "WshockBl.tiff", sep = '_'))}
+
+```
+
+
+#### BL Freezing (Pct Asymptote)
+```{r, fig.width=4.5, fig.height=4.5}
+
+
+component = 'bl'
+
+#Create base layer from group level data
+P.wshock.pctbl = ggplot(
+  data = wshock.prepost.stats[
+    wshock.prepost.stats$component==component,
+  ],
+  aes(x=day,
+      y=pctasym_mean,
+      fill=Trauma,
+      group=Trauma))
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 130
+p.yint = 25
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot
+P.wshock.pctbl  +
+  
+  geom_hline(yintercept = 100, linetype='dashed') +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    #colour = "black",
+    aes(ymin = pctasym_mean - pctasym_sem,
+        ymax = pctasym_mean + pctasym_sem,
+        width = p.width.error
+        )) +
+  
+  geom_line(
+    stat="identity",
+    linewidth = p.line.data.size
+  ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    stroke = p.point.stroke,
+    shape = p.point.shape,
+    show.legend = FALSE
+  ) +
+  
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  scale_x_continuous(breaks=1:7, expand = c(0,.5)) +
+  
+  labs(
+    title = "\n",
+    x = "Day",
+    y = "Freezing (% Asymptote)"
+  ) +
+  
+  p.basetheme +
+  theme(
+     plot.margin = p.margin3,
+     axis.text.x = element_text(angle=0, face='plain'),
+     legend.direction = 'horizontal',
+     legend.position = c(.5,.95)
+  ) 
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "WshockPct.tiff", sep = '_'))}
+
+```
+
+#### Shock Reactivity
+```{r, fig.width=4.5, fig.height=4.5}
+
+
+#Create base layer from group level data
+P.wshock.shock = ggplot(
+  data = wshock.startle.stats[wshock.startle.stats$component!='shock_post',],
+  aes(x=component,
+      y=mean,
+      fill=Trauma,
+      group=Trauma))
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 500
+p.yint = 100
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot
+P.wshock.shock  +
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    #colour = "black",
+    aes(ymin = mean - sem,
+        ymax = mean + sem,
+        width = p.width.error
+        )) +
+  
+  geom_line(
+    stat="identity",
+    linewidth = p.line.data.size
+  ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    stroke = p.point.stroke,
+    shape = p.point.shape,
+    show.legend = FALSE
+  ) +
+  
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  scale_x_discrete(labels=c('bl','shock')) +
+  
+  labs(
+    title = "\n",
+    x = "",
+    y = "Shock Reactivity (au)"
+  ) +
+  
+  p.basetheme +
+  theme(
+    axis.title.x = element_text(margin=margin(b=.5)),
+    axis.text.x= element_text(
+      #size=p.textsize.axis.title-2,
+      face='plain',
+      angle = 0,
+      hjust=.5),
+    legend.position = 'top',
+    legend.direction = 'horizontal',
+    plot.margin = p.margin4
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "ShockReactivity.tiff", sep = '_'))}
+
+```
+
+## Theoretical curves
+Below, simulated examples of learning rate vs stimulus strength changes using Rescorla Wagner are plotted presented.
+### Learning Rate
+```{r}
+
+trials = 7
+l1 = 15
+l2 = 15
+a1 = .375
+a2 = .9
+
+learning.curves = data.frame(
+  'trial' = seq(1,trials,1),
+  'lambda1' = rep(l1, trials),
+  'lambda2' = rep(l2, trials),
+  'alpha1' = rep(a1, trials),
+  'alpha2' = rep(a2, trials),
+  'deltav1' = rep((l1-0)*a1, trials),
+  'deltav2' = rep((l2-0)*a2, trials),
+  'v1' = rep(0, trials),
+  'v2' = rep(0, trials)
+)
+
+for (trial in 2:trials) {
+  learning.curves[trial, 'v1'] = learning.curves[trial-1,'v1'] + learning.curves[trial-1,'deltav1']
+  learning.curves[trial, 'v2'] = learning.curves[trial-1,'v2'] + learning.curves[trial-1,'deltav2']
+  learning.curves[trial, 'deltav1'] = (l1 - learning.curves[trial,'v1']) * a1
+  learning.curves[trial, 'deltav2'] = (l2 - learning.curves[trial,'v2']) * a2
+}
+
+learning.curves.v = pivot_longer(
+  data = learning.curves[c('trial','lambda1','lambda2','alpha1','alpha2','v1','v2')],
+  cols = c('v1','v2'),
+  names_to = 'v'
+)
+learning.curves.v$v = factor(learning.curves.v$v)
+learning.curves.v$v = recode(learning.curves.v$v, 'v1'='NT', 'v2'='T')
+
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 20
+p.yint = 5
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+p.learning.curves = ggplot(
+  data = learning.curves.v,
+  aes(x = trial, y = value, group = v, fill=v)
+)
+
+p.learning.curves + 
+  
+  geom_line(
+    stat="identity",
+    size = p.line.data.size
+  ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    stroke = p.point.stroke,
+    shape = 21
+  ) +
+  
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  scale_x_continuous(breaks=1:trials, expand = c(0,.5)) +
+  
+  ggtitle("Learning\nRate") + ylab("% Freezing") + xlab("Day") +
+  
+  p.basetheme +
+  theme(
+     plot.margin = p.margin3,
+     axis.text.x = element_text(angle=0, face='plain'),
+     legend.direction = 'horizontal',
+     legend.position = c(.5,.95)
+  ) 
+
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "TheoreticalRate.tiff", sep = '_'))}
+
+
+```
+
+
+### Stim Strength
+```{r}
+
+
+trials = 7
+l1 = 7.5
+l2 = 15
+a1 = .9
+a2 = .9
+
+learning.curves = data.frame(
+  'trial' = seq(1,trials,1),
+  'lambda1' = rep(l1, trials),
+  'lambda2' = rep(l2, trials),
+  'alpha1' = rep(a1, trials),
+  'alpha2' = rep(a2, trials),
+  'deltav1' = rep((l1-0)*a1, trials),
+  'deltav2' = rep((l2-0)*a2, trials),
+  'v1' = rep(0, trials),
+  'v2' = rep(0, trials)
+)
+
+for (trial in 2:trials) {
+  learning.curves[trial, 'v1'] = learning.curves[trial-1,'v1'] + learning.curves[trial-1,'deltav1']
+  learning.curves[trial, 'v2'] = learning.curves[trial-1,'v2'] + learning.curves[trial-1,'deltav2']
+  learning.curves[trial, 'deltav1'] = (l1 - learning.curves[trial,'v1']) * a1
+  learning.curves[trial, 'deltav2'] = (l2 - learning.curves[trial,'v2']) * a2
+}
+
+learning.curves.v = pivot_longer(
+  data = learning.curves[c('trial','lambda1','lambda2','alpha1','alpha2','v1','v2')],
+  cols = c('v1','v2'),
+  names_to = 'v'
+)
+learning.curves.v$v = factor(learning.curves.v$v)
+learning.curves.v$v = recode(learning.curves.v$v, 'v1'='NT', 'v2'='T')
+
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 20
+p.yint = 5
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+p.learning.curves = ggplot(
+  data = learning.curves.v,
+  aes(x = trial, y = value, group = v, fill=v)
+)
+
+p.learning.curves + 
+  
+  geom_line(
+    stat="identity",
+    size = p.line.data.size
+  ) +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    stroke = p.point.stroke,
+    shape = 21
+  ) +
+  
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  scale_x_continuous(breaks=1:trials, expand = c(0,.5)) +
+
+  ggtitle("Stimulus\nStrength") + ylab("% Freezing") + xlab("Day") +
+  
+  p.basetheme +
+  theme(
+     plot.margin = p.margin3,
+     axis.text.x = element_text(angle=0),
+     legend.direction = 'horizontal',
+     legend.position = c(.5,.95)
+  ) 
+
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "TheoreticalSensitivity.tiff", sep = '_'))}
+
+
+```
+
+# Stats
+## Trauma Stats
+```{r}
+
+#comparison of trauma animals' freezing
+trauma.fz.anova = ezANOVA(
+  data = trauma.freezing,
+  dv = freezing,
+  wid = Animal,
+  within = component,
+  white.adjust = TRUE,
+  between = .(Trauma),
+  type = 3,
+  detailed = TRUE
+)
+trauma.fz.anova
+
+```
+
+
+## Trauma Recall
+```{r}
+
+#comparison of time in dark side
+traumatest.anova = ezANOVA(
+  data = traumatest,
+  dv = freezing,
+  wid = Animal,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+traumatest.anova
+
+
+```
+
+
+## Weak Shock
+
+### % Shock reactivity
+```{r}
+
+wshock.shockreact.anova = ezANOVA(
+  data = wshock.startle[wshock.startle$component!='shock_post',],
+  dv = motion,
+  wid = Animal,
+  within = component,
+  between = Trauma,
+  type = 3,
+  white.adjust = TRUE,
+  detailed = TRUE
+)
+wshock.shockreact.anova
+
+```
+
+### % Freezing
+```{r}
+
+wshock.prepost$day = as.character(wshock.prepost$day)
+wshock.omni.anova = ezANOVA(
+  data = wshock.prepost[wshock.prepost$component=='bl'
+                        & wshock.prepost$day>=1,],
+  dv = freezing,
+  wid = Animal,
+  within = day,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+wshock.omni.anova
+
+
+wshock1.anova = ezANOVA(
+  data = wshock.prepost[wshock.prepost$day==1 & wshock.prepost$component=='bl',],
+  dv = freezing,
+  wid = Animal,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+wshock1.anova
+
+wshock2.anova = ezANOVA(
+  data = wshock.prepost[wshock.prepost$day==2 & wshock.prepost$component=='bl',],
+  dv = freezing,
+  wid = Animal,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+wshock2.anova
+
+wshock3.anova = ezANOVA(
+  data = wshock.prepost[wshock.prepost$day==3 & wshock.prepost$component=='bl',],
+  dv = freezing,
+  wid = Animal,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+wshock3.anova
+
+wshock4.anova = ezANOVA(
+  data = wshock.prepost[wshock.prepost$day==4 & wshock.prepost$component=='bl',],
+  dv = freezing,
+  wid = Animal,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+wshock4.anova
+
+wshock5.anova = ezANOVA(
+  data = wshock.prepost[wshock.prepost$day==5 & wshock.prepost$component=='bl',],
+  dv = freezing,
+  wid = Animal,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+wshock5.anova
+
+wshock6.anova = ezANOVA(
+  data = wshock.prepost[wshock.prepost$day==6 & wshock.prepost$component=='bl',],
+  dv = freezing,
+  wid = Animal,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+wshock6.anova
+
+wshock7.anova = ezANOVA(
+  data = wshock.prepost[wshock.prepost$day==7 & wshock.prepost$component=='bl',],
+  dv = freezing,
+  wid = Animal,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+wshock7.anova
+
+```
+
+
+### % Asymptote
+```{r}
+
+wshock.prepost$day = as.character(wshock.prepost$day)
+wshock.asym.omni.anova = ezANOVA(
+  data = wshock.prepost[wshock.prepost$component=='bl',],
+  dv = pctasym,
+  wid = Animal,
+  within = day,
+  between = .(Trauma),
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+wshock.asym.omni.anova
+
+
+```

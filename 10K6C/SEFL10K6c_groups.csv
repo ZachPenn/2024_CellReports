@@ -1,0 +1,33 @@
+Animal,Exclude,Notes,HistoNotes,DOB,Surgery,Virus,Region,Trec1,Trec2,Trec3
+1,0,,Some unilateral spread to CEA,9/26/23,12/10/23,HM4Di,BLA,bl,cno,veh
+2,1,Died postop,,9/26/23,12/10/23,HM4Di,BLA,,,
+3,0,,,9/26/23,12/10/23,HM4Di,vHC,bl,cno,veh
+4,0,,,9/26/23,12/10/23,HM4Di,vHC,bl,cno,veh
+5,0,,,9/26/23,12/10/23,HM4Di,BLA,bl,veh,cno
+6,0,,,9/26/23,12/10/23,HM4Di,vHC,bl,cno,veh
+7,0,,,9/26/23,12/10/23,HM4Di,BLA,bl,veh,cno
+8,0,,Touch of unilateral spread to intermediate CA1,9/26/23,12/10/23,HM4Di,BLA,bl,veh,cno
+9,0,"For Trec1, only had last 2 minutes of data.  Recall stats remain the same if animals excluded",,9/26/23,12/10/23,HM4Di,vHC,bl,veh,cno
+10,0,"For Trec1, only had last 2 minutes of data.  Recall stats remain the same if animals excluded",,9/26/23,12/10/23,HM4Di,vHC,bl,cno,veh
+11,0,"For Trec1, only had last 2 minutes of data.  Recall stats remain the same if animals excluded",,9/26/23,12/10/23,HM4Di,BLA,bl,cno,veh
+12,0,"For Trec1, only had last 2 minutes of data.  Recall stats remain the same if animals excluded",Spread lateral on one side,9/26/23,12/10/23,HM4Di,BLA,bl,veh,cno
+13,0,,,9/26/23,12/10/23,HM4Di,vHC,bl,veh,cno
+14,0,,,9/26/23,12/10/23,HM4Di,vHC,bl,cno,veh
+15,0,,,9/26/23,12/10/23,HM4Di,BLA,bl,cno,veh
+16,1,Unilateral targeting,,9/26/23,12/10/23,HM4Di,BLA,bl,cno,veh
+17,0,,,9/26/23,12/10/23,HM4Di,vHC,bl,cno,veh
+18,0,,,9/26/23,12/10/23,HM4Di,vHC,bl,cno,veh
+19,0,,,9/26/23,12/10/23,HM4Di,BLA,bl,cno,veh
+20,0,,,9/26/23,12/10/23,HM4Di,vHC,bl,cno,veh
+21,0,,,9/26/23,12/11/23,HM4Di,vHC,bl,cno,veh
+22,0,,Bit of unliateral spread to CEA,9/26/23,12/11/23,HM4Di,BLA,bl,cno,veh
+23,0,,,9/26/23,12/11/23,HM4Di,vHC,bl,veh,cno
+24,0,,,9/26/23,12/11/23,HM4Di,BLA,bl,veh,cno
+25,0,,,9/26/23,12/11/23,HM4Di,vHC,bl,veh,cno
+26,0,,,9/26/23,12/11/23,HM4Di,BLA,bl,veh,cno
+27,0,,expression weak on one side,9/26/23,12/11/23,HM4Di,vHC,bl,veh,cno
+28,0,,,9/26/23,12/11/23,HM4Di,BLA,bl,veh,cno
+29,0,,,9/26/23,12/11/23,HM4Di,vHC,bl,veh,cno
+30,0,,,9/26/23,12/11/23,HM4Di,BLA,bl,cno,veh
+31,0,,,9/26/23,12/11/23,HM4Di,vHC,bl,veh,cno
+32,0,,Bit weak on one side,9/26/23,12/11/23,HM4Di,BLA,bl,cno,veh

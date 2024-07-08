@@ -57,7 +57,7 @@ drug_order = pivot_longer(
   names_to = 'TestName',
   values_to = 'Drug'
 )
-drug_order$Drug = recode(drug_order$Drug, 'Sal'='veh', 'uPSEM'='uPSEM')
+drug_order$Drug = factor(recode(drug_order$Drug, 'Sal'='veh', 'uPSEM'='uPSEM'), levels=c('veh','uPSEM'))
 drug_order$testnum = sapply(drug_order$TestName, function (x) {l = nchar(x); return(as.numeric(substr(x,l,l)))})
 drug_order$test = sapply(drug_order$TestName,function (x) {l = nchar(x); return(substr(x,1,l-1))})
 
@@ -174,7 +174,7 @@ ld.stats = summarise_at(
 f_pfx = '10k2'
 
 #ggsave
-p.save = FALSE
+p.save = TRUE
 
 #Plot dimensions
 p.dim.width = 4.5 #Plot width (in)
@@ -188,8 +188,8 @@ p.textsize.axis.title = 13
 p.textsize.axis.text = 12
 
 #Plot colors
-p.scale.colour = c("#26466D","red4",'paleturquoise4')
-p.scale.fill = c("#26466D","red4",'paleturquoise4')
+p.scale.colour = c("red4","#26466D",'paleturquoise4')
+p.scale.fill = c("red4","#26466D",'paleturquoise4')
 
 #Plot line dimensions
 p.line.data.size = 1
@@ -197,7 +197,7 @@ p.line.axis.size = .5
 p.line.bar.size = .7
 p.line.error.size = .75
 p.line.ind.size = .6
-p.line.ind.alpha = .3
+p.line.ind.alpha = .2
 
 #Widths
 p.width.bar = .8

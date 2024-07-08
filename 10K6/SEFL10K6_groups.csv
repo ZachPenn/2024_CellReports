@@ -1,0 +1,79 @@
+Animal,Exclude,Batch,DOB,SurgeryDate,Virus,Group,Region,Notes,Exclude,LD,NovS,EPM1,EPM2,TR1,TR2
+4,0,1,1/3/23,4/7/23,eGFP,eGFP,BLA,,,cno,cno,veh,cno,veh,cno
+10,0,1,1/3/23,4/7/23,eGFP,eGFP,BLA,,,cno,cno,cno,veh,veh,cno
+13,0,1,1/3/23,4/10/23,eGFP,eGFP,BLA,,,cno,cno,veh,cno,cno,veh
+24,0,1,1/3/23,4/10/23,eGFP,eGFP,BLA,,,cno,cno,cno,veh,cno,veh
+29,0,1,1/3/23,4/11/23,eGFP,eGFP,BLA,,,cno,cno,cno,veh,veh,cno
+37,0,1,1/17/23,4/11/23,eGFP,eGFP,BLA,,,cno,cno,veh,cno,cno,veh
+43,0,2,3/14/23,6/7/23,eGFP,eGFP,BLA,,,cno,cno,cno,veh,veh,cno
+50,0,2,3/14/23,6/7/23,eGFP,eGFP,BLA,,,cno,cno,veh,cno,cno,veh
+56,0,2,3/14/23,6/7/23,eGFP,eGFP,BLA,,,cno,cno,cno,veh,cno,veh
+60,0,2,3/14/23,6/7/23,eGFP,eGFP,BLA,,,cno,cno,veh,cno,veh,cno
+71,0,2,3/14/23,6/7/23,eGFP,eGFP,BLA,,,cno,cno,cno,veh,veh,cno
+7,0,1,1/3/23,4/7/23,eGFP,eGFP,vHC,,,cno,cno,veh,cno,veh,cno
+11,0,1,1/3/23,4/7/23,eGFP,eGFP,vHC,,,cno,cno,cno,veh,veh,cno
+18,0,1,1/3/23,4/10/23,eGFP,eGFP,vHC,,,cno,cno,cno,veh,cno,veh
+25,0,1,1/3/23,4/10/23,eGFP,eGFP,vHC,,,cno,cno,veh,cno,cno,veh
+31,0,1,1/3/23,4/11/23,eGFP,eGFP,vHC,,,cno,cno,cno,veh,veh,cno
+46,0,2,3/14/23,6/7/23,eGFP,eGFP,vHC,,,cno,cno,veh,cno,cno,veh
+51,0,2,3/14/23,6/7/23,eGFP,eGFP,vHC,,,cno,cno,cno,veh,cno,veh
+57,0,2,3/14/23,6/7/23,eGFP,eGFP,vHC,,,cno,cno,veh,cno,veh,cno
+62,0,2,3/14/23,6/7/23,eGFP,eGFP,vHC,,,cno,cno,cno,veh,veh,cno
+72,0,2,3/14/23,6/7/23,eGFP,eGFP,vHC,,,cno,cno,veh,cno,cno,veh
+82,0,3,6/6/23,8/24/23,eGFP,eGFP,BLA,,,cno,cno,,,,
+85,0,3,6/6/23,8/24/23,eGFP,eGFP,BLA,,,cno,cno,,,,
+86,0,3,6/6/23,8/24/23,eGFP,eGFP,BLA,,,cno,cno,,,,
+89,0,3,6/6/23,8/24/23,eGFP,eGFP,BLA,,,cno,cno,,,,
+1,0,1,1/3/23,4/4/23,HM4D,BLA - HM4D,BLA,,,cno,cno,cno,veh,cno,veh
+3,0,1,1/3/23,4/4/23,HM4D,BLA - HM4D,BLA,,,cno,cno,veh,cno,cno,veh
+6,0,1,1/3/23,4/4/23,HM4D,BLA - HM4D,BLA,"Decent amount of backflow, but no spread to vHC",,cno,cno,cno,veh,veh,cno
+12,1,1,1/3/23,4/4/23,HM4D,BLA - HM4D,BLA,Unilateral targeting.  One side went very medial/ventral,,cno,cno,veh,cno,veh,cno
+15,0,1,1/3/23,4/4/23,HM4D,BLA - HM4D,BLA,,,cno,cno,cno,veh,veh,cno
+17,0,1,1/3/23,4/4/23,HM4D,BLA - HM4D,BLA,,,cno,cno,veh,cno,veh,cno
+19,0,1,1/3/23,4/4/23,HM4D,BLA - HM4D,BLA,,,cno,cno,veh,cno,cno,veh
+22,0,1,1/3/23,4/7/23,HM4D,BLA - HM4D,BLA,"Less expression, particularly on anterior end",,cno,cno,cno,veh,cno,veh
+27,1,1,1/3/23,4/7/23,HM4D,BLA - HM4D,BLA,Looked like vHC injection.  Very lateral and posterior,,cno,cno,veh,cno,veh,cno
+30,0,1,1/3/23,4/7/23,HM4D,BLA - HM4D,BLA,,,cno,cno,cno,veh,veh,cno
+33,0,1,1/17/23,4/7/23,HM4D,BLA - HM4D,BLA,,,cno,cno,veh,cno,cno,veh
+35,1,1,1/17/23,4/7/23,HM4D,BLA - HM4D,BLA,Unilateral targeting,,cno,cno,cno,veh,cno,veh
+36,0,1,1/17/23,4/7/23,HM4D,BLA - HM4D,BLA,,,cno,cno,veh,cno,veh,cno
+42,0,2,3/14/23,6/6/23,HM4D,BLA - HM4D,BLA,"One side fairly medial, targeting entirety of central nucleus in additional to BLA",,cno,cno,cno,veh,cno,veh
+47,0,2,3/14/23,6/6/23,HM4D,BLA - HM4D,BLA,,,cno,cno,veh,cno,veh,cno
+49,0,2,3/14/23,6/6/23,HM4D,BLA - HM4D,BLA,,,cno,cno,cno,veh,veh,cno
+53,0,2,3/14/23,6/6/23,HM4D,BLA - HM4D,BLA,,,cno,cno,veh,cno,cno,veh
+55,1,2,3/14/23,6/6/23,HM4D,BLA - HM4D,BLA,Expression largely unilateral.  One side medial,,cno,cno,veh,cno,veh,cno
+58,0,2,3/14/23,6/9/23,HM4D,BLA - HM4D,BLA,,,cno,cno,cno,veh,cno,veh
+61,0,2,3/14/23,6/7/23,HM4D,BLA - HM4D,BLA,,,cno,cno,veh,cno,cno,veh
+64,0,2,3/14/23,6/9/23,HM4D,BLA - HM4D,BLA,,,cno,cno,cno,veh,veh,cno
+66,0,2,3/14/23,6/9/23,HM4D,BLA - HM4D,BLA,,,cno,cno,cno,veh,cno,veh
+70,0,2,3/14/23,6/9/23,HM4D,BLA - HM4D,BLA,,,cno,cno,veh,cno,veh,cno
+2,0,1,1/3/23,4/4/23,HM4D,vHC - HM4D,vHC,,,cno,cno,cno,veh,cno,veh
+5,0,1,1/3/23,4/4/23,HM4D,vHC - HM4D,vHC,,,cno,cno,veh,cno,cno,veh
+8,1,1,1/3/23,4/7/23,HM4D,vHC - HM4D,vHC,Died during surgery,,,,,,,
+9,0,1,1/3/23,4/4/23,HM4D,vHC - HM4D,vHC,,,cno,cno,cno,veh,veh,cno
+14,0,1,1/3/23,4/4/23,HM4D,vHC - HM4D,vHC,,,cno,cno,veh,cno,veh,cno
+16,0,1,1/3/23,4/4/23,HM4D,vHC - HM4D,vHC,,,cno,cno,cno,veh,veh,cno
+20,0,1,1/3/23,4/4/23,HM4D,vHC - HM4D,vHC,A bit weak on one side,,cno,cno,veh,cno,cno,veh
+21,0,1,1/3/23,4/7/23,HM4D,vHC - HM4D,vHC,Some spill into most posterior BLA,,cno,cno,veh,cno,cno,veh
+23,0,1,1/3/23,4/7/23,HM4D,vHC - HM4D,vHC,,,cno,cno,cno,veh,veh,cno
+26,1,1,1/3/23,4/7/23,HM4D,vHC - HM4D,vHC,Some spill into most posterior BLA.  Minimal vHC expression,,cno,cno,veh,cno,veh,cno
+28,0,1,1/3/23,4/7/23,HM4D,vHC - HM4D,vHC,,,cno,cno,cno,veh,cno,veh
+32,0,1,1/3/23,4/7/23,HM4D,vHC - HM4D,vHC,,,cno,cno,veh,cno,cno,veh
+34,0,1,1/17/23,4/7/23,HM4D,vHC - HM4D,vHC,,,cno,cno,cno,veh,veh,cno
+41,0,2,3/14/23,6/6/23,HM4D,vHC - HM4D,vHC,,,cno,cno,cno,veh,cno,veh
+45,0,2,3/14/23,6/6/23,HM4D,vHC - HM4D,vHC,One side spreads to most posterior BLA,,cno,cno,veh,cno,veh,cno
+48,0,2,3/14/23,6/6/23,HM4D,vHC - HM4D,vHC,One side spreads to most posterior BLA.  A bit of lateral spread,,cno,cno,cno,veh,veh,cno
+52,0,2,3/14/23,6/6/23,HM4D,vHC - HM4D,vHC,,,cno,cno,veh,cno,cno,veh
+54,1,2,3/14/23,6/6/23,HM4D,vHC - HM4D,vHC,Expression largely unilateral,,cno,cno,veh,cno,veh,cno
+59,0,2,3/14/23,6/9/23,HM4D,vHC - HM4D,vHC,,,cno,cno,cno,veh,cno,veh
+63,0,2,3/14/23,6/9/23,HM4D,vHC - HM4D,vHC,,,cno,cno,veh,cno,cno,veh
+65,0,2,3/14/23,6/9/23,HM4D,vHC - HM4D,vHC,,,cno,cno,cno,veh,veh,cno
+67,0,2,3/14/23,6/9/23,HM4D,vHC - HM4D,vHC,,,cno,cno,veh,cno,veh,cno
+69,1,2,3/14/23,6/9/23,HM4D,vHC - HM4D,vHC,Unilateral targeting,,cno,cno,cno,veh,cno,veh
+81,0,3,6/6/23,8/24/23,HM4D,BLA - HM4D,BLA,,,cno,cno,,,,
+83,0,3,6/6/23,8/24/23,HM4D,BLA - HM4D,BLA,,,cno,cno,,,,
+84,0,3,6/6/23,8/24/23,HM4D,BLA - HM4D,BLA,,,cno,cno,,,,
+87,0,3,6/6/23,8/24/23,HM4D,BLA - HM4D,BLA,,,cno,cno,,,,
+88,0,3,6/6/23,8/24/23,HM4D,BLA - HM4D,BLA,Spreads quite medial on one side.,,cno,cno,,,,
+44,1,2,,,,,,Died during surgery,,,,,,,
+68,1,2,,,,,,Died during surgery,,,,,,,

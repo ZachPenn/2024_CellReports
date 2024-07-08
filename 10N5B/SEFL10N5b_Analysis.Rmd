@@ -1,5 +1,5 @@
 ---
-title: "SEFL10K_Analysis"
+title: "SEFL10N5b_Analysis"
 author: "Zach"
 output:
   html_document: 
@@ -37,27 +37,40 @@ library(purrr)
 
 
 # Import Data 
-Load  files and factorize as necessary.\
-Note that animals with sham surgery in vHC/BLA combined in this analysis into common CTRL group.\
+Load  files and factorize as necessary.
 ```{r}
 
 #load  files
-data_vf = read.csv('SEFL10K_vfdata.csv',header=TRUE)
-data_ld = read.csv('SEFL10K_lddata.csv',header=TRUE)
-groups = read.csv('SEFL10K_groups.csv',header=TRUE)
+data_vf = read.csv('SEFL10N5b_vfdata.csv',header=TRUE)
+data_ld = read.csv('SEFL10N5b_lddata.csv',header=TRUE)
+groups = read.csv('SEFL10N5b_groups.csv',header=TRUE)
 
 
 #factorize as necessary
 groups$Animal = factor(groups$Animal)
-groups$Group = factor(groups$Group, levels=c('Ctrl', 'BLA - PSAM', 'vHC - PSAM'))
-groups$Group = recode(groups$Group, 'Ctrl' = 'Ctrl', 'BLA - PSAM' = 'PSAM-BLA', 'vHC - PSAM' = 'PSAM-vHC')
+groups$Group = factor(groups$Group, levels=c('mCherry', 'HM4D: BLA->vHC', 'HM4D: vHC->BLA'))
 data_vf$Animal = factor(data_vf$Animal)
 data_ld$Animal = factor(data_ld$Animal)
 
 
-# #add group info to data files
+#get dataframe for drug order
+drug_order = pivot_longer(
+  data = groups[,c('Animal','Trec1','Trec2')],
+  cols = c('Trec1','Trec2'),
+  names_to = 'TestName',
+  values_to = 'Drug'
+)
+drug_order$testnum = sapply(drug_order$TestName, function (x) {l = nchar(x); return(as.numeric(substr(x,l,l)))})
+drug_order$testnum = as.factor(drug_order$testnum)
+drug_order$test = sapply(drug_order$TestName,function (x) {l = nchar(x); return(substr(x,1,l-1))})
+drug_order$Drug = factor(drug_order$Drug, levels = c('veh','cno'))
+
+
+#add group info to data files
 data_vf = inner_join(x=groups,y=data_vf,by="Animal")
 data_ld = inner_join(x=groups,y=data_ld,by="Animal")
+data_vf = left_join(x=data_vf, y=drug_order[drug_order$test=='Trec',], by=c('Animal'='Animal','subphase'='testnum'))
+
 
 ```
 
@@ -91,6 +104,14 @@ trauma.shockreact = summarise_at(
 )
 
 
+#Collapse ld data
+data_ld = data_ld[data_ld$bin<5,]
+ld.collapsed = summarize_at(
+  .tbl = group_by(data_ld, Animal, Group, Source, Target),
+  .funs = list(mean),
+  .vars = c('dark','Distance_in'))
+
+
 #trauma test data
 traumatest = data_vf[data_vf$phase=='traumatest' & data_vf$subphase=='avg',]
 
@@ -111,18 +132,16 @@ novstressor.startle$component = factor(
 sefltest = data_vf[data_vf$phase=='sefltest' & data_vf$subphase=='avg',]
 
 
-#Collapse ld data
-data_ld = data_ld[data_ld$bin<5,]
-ld.collapsed = summarize_at(
-  .tbl = group_by(data_ld, Animal, Group, Region),
-  .funs = list(mean),
-  .vars = c('dark','Distance_in'))
+#trauma recall with drug
+traumatest_drug = data_vf[data_vf$phase=='traumatest_drug' & data_vf$component=='avg',]
+#exclude mouse 12, given two doses of cno
+traumatest_drug = traumatest_drug[traumatest_drug$Animal!=12,]
 
 #subsetted dataframes to compare controls
-ctrl.trauma = trauma.freezing[trauma.freezing$Group=='Ctrl',]
-ctrl.traumatest = traumatest[traumatest$Group=='Ctrl',]
-ctrl.ld = ld.collapsed[ld.collapsed$Group=='Ctrl',]
-ctrl.sefltest = sefltest[sefltest$Group=='Ctrl',]
+ctrl.trauma = trauma.freezing[trauma.freezing$Group=='mCherry',]
+ctrl.traumatest = traumatest[traumatest$Group=='mCherry',]
+ctrl.ld = ld.collapsed[ld.collapsed$Group=='mCherry',]
+ctrl.sefltest = sefltest[sefltest$Group=='mCherry',]
 
 ```
 
@@ -153,6 +172,15 @@ trauma.shockreact.stats = summarise_at(
 )
 
 
+#ld stats
+ld.stats = summarise_at(
+  .tbl = group_by(
+    .data = ld.collapsed,
+    Group),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('dark','Distance_in'))
+
+
 #trauma test
 traumatest.stats = summarise_at(
   .tbl = group_by(
@@ -172,6 +200,7 @@ novstressor.prepost.stats = summarise_at(
   .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
   .vars = c('freezing','motion')
 )
+
 #novel stressor startle
 novstressor.startle.stats = summarise_at(
   .tbl = group_by(
@@ -192,13 +221,14 @@ sefltest.stats = summarise_at(
 )
 
 
-#ld stats
-ld.stats = summarise_at(
+#trauma recall with drug
+traumatest_drug.stats = summarise_at(
   .tbl = group_by(
-    .data = ld.collapsed,
-    Group),
+    .data = traumatest_drug,
+    Group, Drug),
   .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
-  .vars = c('dark','Distance_in'))
+  .vars = c('freezing','motion')
+)
 
 
 ```
@@ -210,7 +240,7 @@ ld.stats = summarise_at(
 ```{r}
 
 #set figure file prefix
-f_pfx = '10k'
+f_pfx = '10N5b'
 
 #ggsave
 p.save = TRUE
@@ -223,18 +253,20 @@ p.dim.dpi = 500 #Plot dpi
 #Plot text
 p.textsize.title = 20
 p.textsize.legend =10
-p.textsize.axis.title = 12
-p.textsize.axis.text = 10
+p.textsize.axis.title = 13
+p.textsize.axis.text = 12
 
 #Plot colors
-p.scale.colour = c("thistle4","red4","#26466D")
-p.scale.fill = c("thistle4","red4","#26466D")
+p.scale.colour = c("white","red3", "royalblue3")
+p.scale.fill = c("white","red3", "royalblue3")
 
 #Plot line dimensions
 p.line.data.size = 1
 p.line.axis.size = .5
 p.line.bar.size = .7
 p.line.error.size = .75
+p.line.ind.size = .6
+p.line.ind.alpha = .3
 
 #Widths
 p.width.bar = .7
@@ -249,10 +281,6 @@ p.dot.size = 2.5
 p.dot.shape = 21
 p.dot.alpha = .25
 
-#Plot colors
-p.scale.colour = c("thistle4","red4","#26466D",'paleturquoise4')
-p.scale.fill = c("thistle4","red4","#26466D",'paleturquoise4')
-#p.scale.fill = c("white","darkgray","royalblue4","red2",'darkgreen')
 
 #Plot line dimensions
 p.line.data.size = 1
@@ -274,15 +302,15 @@ p.dot.shape = 21
 p.dot.alpha = .3
 
 #p.margin
-p.margin1 = unit(c(2, 3.25, .3, 3.25), "cm")
-p.margin2 = plot.margin = unit(c(2, 3.6, 2.2, 3.6), "cm")
+p.margin1 = unit(c(.9, 3.25, 0, 3.25), "cm")
+p.margin2 = unit(c(2, 3.6, 2.2, 3.6), "cm")
 p.margin3 = unit(c(2, 3.25, 2.45, 3.25), "cm") #for trauma
 
 #base theme
 p.basetheme = theme_bw() + theme(
     panel.grid = element_blank(), 
     panel.border = element_rect(colour = "white"),
-    axis.line = element_line(color="black", size = p.line.axis.size),
+    axis.line = element_line(color="black", linewidth = p.line.axis.size),
     plot.title = element_text(
       size=p.textsize.title, 
       hjust=.5, margin=margin(b=15,t=10), 
@@ -353,7 +381,7 @@ P.Trauma.Freezing  +
   
   geom_line(
     stat="identity",
-    size = p.line.data.size
+    linewidth = p.line.data.size
   ) +
   
   geom_point(
@@ -383,7 +411,7 @@ P.Trauma.Freezing  +
       face='plain',
       angle = 0,
       vjust=.5),
-    legend.position = c(.9,.23),
+    legend.position = c(.9,.18),
     plot.margin = p.margin3
   )
 
@@ -448,12 +476,14 @@ P.Trauma.Shock  +
   theme(
     axis.text.x= element_text(
       angle = 0,
-      vjust=.5
+      vjust=.5,
+      hjust=.5
     ),
+    plot.margin = p.margin3,
     legend.position = c(.4,.85)
   )
 
-if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma_ShockReact.tiff", sep = '_'))}
+#if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Trauma_ShockReact.tiff", sep = '_'))}
 
 
 ```
@@ -473,10 +503,10 @@ P.LD.dark = ggplot(
       group=Group)) 
 
 #Define plot specific parameters
-p.ymin = .4
-p.ymax = 1.02
+p.ymin = .17
+p.ymax = 1.015
 p.yint = .2
-p.breaks = seq(p.ymin,p.ymax,p.yint)
+p.breaks = seq(.2,1,p.yint)
 
 #Create plot
 P.LD.dark  +
@@ -517,7 +547,7 @@ P.LD.dark  +
     y = "% Time in Dark"
   ) +
   
-  p.basetheme
+  p.basetheme 
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "LD_Dark.tiff", sep = '_'))}
 
@@ -607,7 +637,7 @@ P.TraumaTest = ggplot(
 
 #Define plot specific parameters
 p.ymin = 0
-p.ymax = 100
+p.ymax = 75
 p.yint = 25
 p.breaks = seq(p.ymin,p.ymax,p.yint)
 
@@ -654,7 +684,7 @@ P.TraumaTest  +
     y = "% Freezing"
   ) +
   
-  p.basetheme 
+p.basetheme 
 
 
 if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "TraumaRecall.tiff", sep = '_'))}
@@ -720,7 +750,7 @@ P.MS.Startle  +
     legend.position =  c(.4,.85)
   )
 
-if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Startle.tiff", sep = '_'))}
+#if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Startle.tiff", sep = '_'))}
 
 ```
 
@@ -784,7 +814,7 @@ P.MS.Prepost  +
     legend.position =  c(.35,.85)
   )
 
-if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Freezing.tiff", sep = '_'))}
+#if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "NovStressor_Freezing.tiff", sep = '_'))}
 
 ```
 
@@ -859,6 +889,61 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "SEFLTest.tiff", sep = '_'
 
 
 
+### Trauma Recall with Drug
+```{r, fig.width=4.5, fig.height=4.5}
+
+#Create base layer from group level data
+P.TR_drug = ggplot(
+  data = traumatest_drug.stats,
+  aes(x=Drug,
+      y=freezing_mean,
+      fill=Group,
+      group=Group)) 
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 80
+p.yint = 20
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot 
+P.TR_drug  +
+  
+  geom_crossbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = freezing_mean - freezing_sem,
+        ymax = freezing_mean + freezing_sem),
+    width = p.width.bar,
+    show.legend = FALSE) +
+  
+  geom_line(
+    data = traumatest_drug,
+    aes(
+      x = Drug,
+      y = freezing,
+      group = Animal
+    ),
+    alpha = p.line.ind.alpha,
+    size = p.line.ind.size,
+    color = 'black'
+  ) +
+  
+  facet_grid(cols = vars(Group)) +
+  
+  scale_fill_manual(values=p.scale.fill) +
+  scale_colour_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, labels = p.breaks, expand = c(0, 0)) +
+  
+  labs(y = "% Freezing") +
+  p.basetheme
+
+#if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "TraumaRecallDrug.tiff", sep = '_'))}
+
+```
+
 
 ### Plot comparison of vHC/BLA controls
 ##### Trauma
@@ -875,15 +960,15 @@ P.ctrls.trauma = ggplot(
   data = summarise_at(
     .tbl = group_by(
       .data = ctrl.trauma,
-      subphase,component,Region),
+      subphase,component,Target),
     .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
     .vars = c('freezing','motion')
   ),
   aes(
     x=component,
     y=freezing_mean,
-    fill=Region,
-    group = interaction(subphase,Region)
+    fill=Target,
+    group = interaction(subphase,Target)
   )
 ) 
 
@@ -915,19 +1000,19 @@ P.ctrls.trauma +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   scale_x_discrete(labels=c('bl','1','2','3','4','5','6','7','8','9','10')) +
   
-  ggtitle("Trauma") + ylab("% Freezing") + xlab("Shock") +
+  ylab("% Freezing") + xlab("Shock") +
   
   p.basetheme +
   theme(
     plot.title = element_text(margin=margin(b=25,t=5)),
-    axis.title.x = element_text(margin = margin(t=10)),
+    axis.title.x = element_text(margin=margin(t=-3)),
     axis.text.x= element_text(
       size=p.textsize.axis.title-2,
       face='plain',
       angle = 0,
       vjust=.5),
-    legend.position = c(.8,.2),
-    plot.margin=unit(c(1, 3.2, .5, 3.2), "cm") #(top,right,bottom,left)
+    legend.position = c(.9,.23),
+    plot.margin = p.margin3
   )
 
   if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CtrlsONLY_Trauma.tiff", sep = '_'))}
@@ -944,14 +1029,14 @@ P.ctrls.LD.dark = ggplot(
   data = summarise_at(
     .tbl = group_by(
       .data = ctrl.ld,
-      Region),
+      Source),
     .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
     .vars = c('dark','Distance_in')
   ),
   aes(
-    x=Region,
+    x=Source,
     y=dark_mean,
-    fill=Region
+    fill=Source
   )
 ) 
 
@@ -974,7 +1059,7 @@ P.ctrls.LD.dark  +
   
   geom_jitter(
     data = ctrl.ld,
-    aes(x=Region,
+    aes(x=Source,
         y=dark),
     width = p.width.bar* p.width.jitter,
     height = 0,
@@ -993,7 +1078,7 @@ P.ctrls.LD.dark  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, labels = p.breaks*100, expand = c(0, 0)) +
 
-  ggtitle("Light-Dark") + ylab("% Time on Dark Side") + xlab("") +
+  ylab("% Time on Dark Side") + xlab("") +
   
   p.basetheme
 
@@ -1007,21 +1092,19 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CtrlsONLY_LD_Dark.tiff", 
 ##### TraumaRecall
 ```{r}
 
-
-
 #Create base layer from group level data
 P.ctrls.traumatest = ggplot(
   data = summarise_at(
     .tbl = group_by(
       .data = ctrl.traumatest,
-      Region),
+      Source),
     .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
     .vars = c('freezing','motion')
   ),
   aes(
-    x=Region,
+    x=Source,
     y=freezing_mean,
-    fill=Region
+    fill=Source
   )
 ) 
 
@@ -1044,7 +1127,7 @@ P.ctrls.traumatest  +
   
   geom_jitter(
     data = ctrl.traumatest,
-    aes(x=Region,
+    aes(x=Source,
         y=freezing),
     width = p.width.bar * p.width.jitter,
     height = 0,
@@ -1068,7 +1151,7 @@ P.ctrls.traumatest  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Trauma Recall") + ylab("% Freezing") + xlab("") +
+  ylab("% Freezing") + xlab("") +
   
   p.basetheme
 
@@ -1086,14 +1169,14 @@ P.ctrls.sefltest = ggplot(
   data = summarise_at(
     .tbl = group_by(
       .data = ctrl.sefltest,
-      Region),
+      Source),
     .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
     .vars = c('freezing','motion')
   ),
   aes(
-    x=Region,
+    x=Source,
     y=freezing_mean,
-    fill=Region
+    fill=Source
   )
 ) 
 
@@ -1116,7 +1199,7 @@ P.ctrls.sefltest  +
   
   geom_jitter(
     data = ctrl.sefltest,
-    aes(x=Region,
+    aes(x=Source,
         y=freezing),
     width = p.width.bar * p.width.jitter,
     height = 0,
@@ -1140,7 +1223,7 @@ P.ctrls.sefltest  +
   coord_cartesian(ylim=c(p.ymin,p.ymax)) +
   scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
   
-  ggtitle("Novel Stressor") + ylab("% Freezing") + xlab("") +
+  ylab("% Freezing") + xlab("") +
   
   p.basetheme
 
@@ -1152,30 +1235,6 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "CtrlsONLY_SEFLTest.tiff",
 
 
 # Stats
-## PSAM effects
-### Contrast sets
-Here, contrasts for a-prior comparisons is set.
-Here, contrasts for a-prior comparisons is set.
-Currently, all planned comparisons performed independent of omnibus because of 
-heteroscedasticity. Comparisons were performed using both Welch procedure and
-hccm standard errors and rendered the same pattern of results.
-```{r}
-
-#a-prior comparisons
-comparisons = list(
-  c('Ctrl', 'PSAM-BLA'),
-  c('Ctrl', 'PSAM-vHC')
-)
-
-pcrit = 1 - (1 - .05)^(1/length(comparisons)) #Dunn-Sidak pcrit
-
-#function to perform hccm coefficient tests
-coeftest.hccm = function(linmod) {
-  tests = coeftest(linmod, hccm(linmod, 'hc3'))
-  return(list('tests'=tests, 'df'=linmod$df.residual))
-}
-
-```
 
 ## trauma
 ```{r}
@@ -1194,45 +1253,42 @@ trauma.fz.anova
 
 ```
 
-### SEFL Test Stats
+
+## Light Dark Stats
+### Dark side time
 ```{r}
 
-sefl.anova = ezANOVA(
-  data = sefltest,
-  dv = freezing,
+ld.dark.anova = ezANOVA(
+  data = ld.collapsed,
+  dv = dark,
   wid = Animal,
   between = Group,
   white.adjust = TRUE,
   type = 3,
   detailed = TRUE
 )
-sefl.anova
+ld.dark.anova
 
-sefltest.posthoc = list()
-sefltest.hccm.posthoc = list()
-for (comp in comparisons){
-  sefltest.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
-    sefltest,
-    t.test(
-      freezing[Group==comp[1]], freezing[Group==(comp)[2]],
-      var.equal = FALSE
-    )
-  )
-  linmod = lm(
-    freezing~Group, 
-    data = sefltest,
-    subset = sefltest$Group==comp[1] | sefltest$Group==comp[2]
-  )
-  sefltest.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
-}
-sefltest.posthoc
-#sefltest.hccm.posthoc
-paste('critical for multiple comparisons: ', round(pcrit, 4))
+```
+
+### Distance travelled
+```{r}
+
+ld.dist.anova = ezANOVA(
+  data = ld.collapsed,
+  dv = Distance_in,
+  wid = Animal,
+  between = Group,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+ld.dist.anova
 
 ```
 
 
-### Trauma Test Stats
+## Trauma Test Stats
 ```{r}
 
 traumatest.anova = ezANOVA(
@@ -1249,167 +1305,85 @@ traumatest.anova
 ```
 
 
+## SEFL Test Stats
+```{r}
+
+sefl.anova = ezANOVA(
+  data = sefltest,
+  dv = freezing,
+  wid = Animal,
+  between = Group,
+  white.adjust = TRUE,
+  type = 3,
+  detailed = TRUE
+)
+sefl.anova
+
+```
+
+##Ctrl comparisons
 
 ### Trauma Stats
 ```{r}
-#comparison of trauma animals' freezing
-trauma.fz.anova = ezANOVA(
-  data = trauma.freezing,
+
+trauma.ctrl.anova = ezANOVA(
+  data = trauma.freezing[trauma.freezing$Group=='mCherry',],
   dv = freezing,
   wid = Animal,
   within = component,
   white.adjust = TRUE,
-  between = Group,
+  between = Source,
   type = 3,
   detailed = TRUE
 )
-trauma.fz.anova
+trauma.ctrl.anova
 
 ```
 
-
-### Light Dark Stats
-#### Dark side time
+### Trauma Test Stats
 ```{r}
 
-#comparison of time in dark side
-ld.dark.anova = ezANOVA(
-  data = ld.collapsed,
-  dv = dark,
-  wid = Animal,
-  between = Group,
-  white.adjust = TRUE,
-  type = 3,
-  detailed = TRUE
-)
-ld.dark.anova
-
-ld.dark.posthoc = list()
-ld.dark.hccm.posthoc = list()
-for (comp in comparisons){
-  ld.dark.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
-    ld.collapsed,
-    t.test(
-      dark[Group==comp[1]], dark[Group==(comp)[2]],
-      var.equal = FALSE
-    ))
-  linmod = lm(
-    dark~Group, 
-    data = ld.collapsed,
-    subset = ld.collapsed$Group==comp[1] | ld.collapsed$Group==comp[2]
-  )
-  ld.dark.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
-}
-ld.dark.posthoc
-#ld.dark.hccm.posthoc
-paste('critical for multiple comparisons: ', round(pcrit, 4))
-
-
-```
-
-#### Distance travelled
-```{r}
-
-#comparison of time in dark side
-ld.dist.anova = ezANOVA(
-  data = ld.collapsed,
-  dv = Distance_in,
-  wid = Animal,
-  between = Group,
-  white.adjust = TRUE,
-  type = 3,
-  detailed = TRUE
-)
-print(ld.dist.anova)
-
-ld.dist.posthoc = list()
-ld.dist.hccm.posthoc = list()
-for (comp in comparisons){
-  ld.dist.posthoc[[paste(comp[1], 'vs', comp[2])]] = with(
-    ld.collapsed,
-    t.test(
-      Distance_in[Group==comp[1]], Distance_in[Group==(comp)[2]],
-      var.equal = FALSE
-    ))
-  linmod = lm(
-    Distance_in~Group, 
-    data = ld.collapsed,
-    subset = ld.collapsed$Group==comp[1] | ld.collapsed$Group==comp[2]
-  )
-  ld.dist.hccm.posthoc[[paste(comp[1], 'vs', comp[2])]] = coeftest.hccm(linmod)
-}
-ld.dist.posthoc
-ld.dist.hccm.posthoc
-paste('critical for multiple comparisons: ', round(pcrit, 4))
-
-```
-
-
-### BLA/vHC Controls
-#### Trauma
-Note there are too few subjects to compute the following.
-Examination of above plot shows near equivalence
-```{r}
-
-# ctrl.trauma$component = factor(ctrl.trauma$component)
-# ctrl.trauma.fz.anova = ezANOVA(
-#   data = ctrl.trauma,
-#   dv = freezing,
-#   wid = Animal,
-#   within = component,
-#   white.adjust = TRUE,
-#   between = Region,
-#   type = 3,
-#   detailed = TRUE
-# )
-# ctrl.trauma.fz.anova
-
-```
-
-#### Trauma Test
-```{r}
-
-ctrl.traumatest.fz.anova = ezANOVA(
-  data = ctrl.traumatest,
+traumatest.ctrl.anova = ezANOVA(
+  data = traumatest[traumatest$Group=='mCherry',],
   dv = freezing,
   wid = Animal,
+  between = Source,
   white.adjust = TRUE,
-  between = Region,
   type = 3,
   detailed = TRUE
 )
-ctrl.traumatest.fz.anova
+traumatest.ctrl.anova
 
 ```
 
-#### Light Dark
+### LD Stats
 ```{r}
 
-ctrl.ld.anova = ezANOVA(
-  data = ctrl.ld,
+ld.dark.ctrl.anova = ezANOVA(
+  data = ld.collapsed[ld.collapsed$Group=='mCherry',],
   dv = dark,
   wid = Animal,
+  between = Source,
   white.adjust = TRUE,
-  between = Region,
   type = 3,
   detailed = TRUE
 )
-ctrl.ld.anova
+ld.dark.ctrl.anova
 
 ```
 
-#### SEFL Test
+### SEFL Test Stats
 ```{r}
 
-ctrl.sefltest.fz.anova = ezANOVA(
-  data = ctrl.sefltest,
+sefltest.ctrl.anova = ezANOVA(
+  data = sefltest[sefltest$Group=='mCherry',],
   dv = freezing,
   wid = Animal,
+  between = Source,
   white.adjust = TRUE,
-  between = Region,
   type = 3,
   detailed = TRUE
 )
-ctrl.sefltest.fz.anova
+sefltest.ctrl.anova
 
 ```

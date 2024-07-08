@@ -1,30 +1,30 @@
-Animal,Notes,Exclude,Batch,DOB,Surgery,Anisomycin,Trauma,Group,ExpTest2_Drug,AcqTest_Drug
-1,,0,1,7/14/20,10/15/20,Veh,NT,NT-Veh,,Veh
-2,,0,1,7/14/20,10/16/20,Veh,T,T-Veh,ANI,
-3,,0,1,7/14/20,10/16/20,Veh,NT,NT-Veh,,ANI
-4,,0,1,7/14/20,10/16/20,Veh,T,T-Veh,Veh,
-5,,0,1,7/14/20,10/16/20,ANI,T,T-Ani,,
-6,Lost cheadcap during dose test 2,1,1,7/14/20,10/16/20,Veh,T,T-Veh,Veh,
-7,,0,1,7/14/20,10/20/20,Veh,T,T-Veh,ANI,
-8,,0,1,7/14/20,10/20/20,Veh,NT,NT-Veh,,Veh
-9,,0,1,7/14/20,10/21/20,Veh,T,T-Veh,Veh,
-10,Ventricles looked engorged when brain removed,0,1,7/14/20,10/21/20,ANI,T,T-Ani,,
-11,,0,1,7/14/20,10/21/20,Veh,NT,NT-Veh,,ANI
-12,,0,1,7/14/20,10/21/20,ANI,T,T-Ani,,
-13,,0,1,7/14/20,10/21/20,ANI,T,T-Ani,,
-14,,0,1,7/14/20,10/21/20,Veh,T,T-Veh,ANI,
-15,,0,1,7/14/20,10/22/20,ANI,T,T-Ani,,
-16,,0,1,7/14/20,10/22/20,Veh,NT,NT-Veh,,ANI
-17,,0,2,7/14/20,10/22/20,Veh,T,T-Veh,Veh,
-18,,0,2,7/14/20,10/22/20,ANI,T,T-Ani,,
-19,,0,2,7/14/20,10/22/20,Veh,NT,NT-Veh,,Veh
-20,,0,2,7/14/20,10/23/20,ANI,T,T-Ani,,
-21,,0,2,7/14/20,10/23/20,ANI,T,T-Ani,,
-22,,0,2,7/14/20,10/23/20,Veh,T,T-Veh,ANI,
-23,,0,2,7/14/20,10/23/20,ANI,T,T-Ani,,
-24,,0,2,7/14/20,10/23/20,Veh,NT,NT-Veh,,ANI
-25,,0,2,7/14/20,10/24/20,ANI,T,T-Ani,,
-26,For DoseTest2 was run in box as 28,0,2,7/14/20,10/24/20,Veh,T,T-Veh,ANI,
-27,,0,3,7/14/20,10/24/20,Veh,NT,NT-Veh,,Veh
-28,For DoseTest2 was run in box as 26,0,3,7/14/20,10/24/20,Veh,T,T-Veh,Veh,
-29,,0,3,7/14/20,10/24/20,Veh,NT,NT-Veh,,ANI
+Animal,Notes,Exclude,Batch,DOB,Surgery,Anisomycin,Trauma,Group,ExpTest2_Drug,AcqTest_Drug,Fos_Drug
+1,,0,1,7/14/20,10/15/20,Veh,NT,NT-Veh,,Veh,0
+2,,0,1,7/14/20,10/16/20,Veh,T,T-Veh,ANI,,
+3,,0,1,7/14/20,10/16/20,Veh,NT,NT-Veh,,ANI,10
+4,,0,1,7/14/20,10/16/20,Veh,T,T-Veh,Veh,,
+5,,0,1,7/14/20,10/16/20,ANI,T,T-Ani,,,
+6,Lost cheadcap during dose test 2,1,1,7/14/20,10/16/20,Veh,T,T-Veh,Veh,,
+7,,0,1,7/14/20,10/20/20,Veh,T,T-Veh,ANI,,
+8,,0,1,7/14/20,10/20/20,Veh,NT,NT-Veh,,Veh,0
+9,,0,1,7/14/20,10/21/20,Veh,T,T-Veh,Veh,,
+10,Ventricles looked engorged when brain removed,0,1,7/14/20,10/21/20,ANI,T,T-Ani,,,
+11,,0,1,7/14/20,10/21/20,Veh,NT,NT-Veh,,ANI,10
+12,,0,1,7/14/20,10/21/20,ANI,T,T-Ani,,,
+13,,0,1,7/14/20,10/21/20,ANI,T,T-Ani,,,
+14,,0,1,7/14/20,10/21/20,Veh,T,T-Veh,ANI,,
+15,,0,1,7/14/20,10/22/20,ANI,T,T-Ani,,,
+16,,0,1,7/14/20,10/22/20,Veh,NT,NT-Veh,,ANI,0
+17,,0,2,7/14/20,10/22/20,Veh,T,T-Veh,Veh,,
+18,,0,2,7/14/20,10/22/20,ANI,T,T-Ani,,,
+19,,0,2,7/14/20,10/22/20,Veh,NT,NT-Veh,,Veh,
+20,,0,2,7/14/20,10/23/20,ANI,T,T-Ani,,,
+21,,0,2,7/14/20,10/23/20,ANI,T,T-Ani,,,
+22,,0,2,7/14/20,10/23/20,Veh,T,T-Veh,ANI,,
+23,,0,2,7/14/20,10/23/20,ANI,T,T-Ani,,,
+24,,0,2,7/14/20,10/23/20,Veh,NT,NT-Veh,,ANI,0
+25,,0,2,7/14/20,10/24/20,ANI,T,T-Ani,,,
+26,For DoseTest2 was run in box as 28,0,2,7/14/20,10/24/20,Veh,T,T-Veh,ANI,,
+27,,0,3,7/14/20,10/24/20,Veh,NT,NT-Veh,,Veh,
+28,For DoseTest2 was run in box as 26,0,3,7/14/20,10/24/20,Veh,T,T-Veh,Veh,,
+29,,0,3,7/14/20,10/24/20,Veh,NT,NT-Veh,,ANI,10

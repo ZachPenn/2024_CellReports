@@ -1,0 +1,324 @@
+---
+title: "SEFL10K9_Analysis"
+author: "Zach"
+output:
+  html_document: 
+    fig_height: 4.5
+    fig_width: 4.5
+    highlight: kate
+    number_sections: yes
+    theme: journal
+    toc: yes
+    toc_depth: 6
+editor_options: 
+  chunk_output_type: console
+---
+
+
+# Set Global Options
+```{r global_options}
+knitr::opts_chunk$set(fig.width=4.5, fig.height=4.5, echo=TRUE, warning=FALSE,message=FALSE)
+```
+
+
+
+# Load Packages 
+```{r}
+library(ggplot2)
+library(ez)
+library(knitr)
+library(tidyr)
+library(car)
+library(dplyr)
+library(purrr)
+```
+
+
+
+# Import Data 
+Load  spike times.\
+Note that drug was applied to bath after 10 minute baseline.
+Recording proceeded for additional 50 minutes
+```{r}
+
+#load  files
+spikes = read.csv('SEFL10K9_spiketimes.csv',header=TRUE)
+
+```
+
+
+# Bin spikes across time
+Define number of spikes in evenly spaced bins across 60 minutes recording
+```{r}
+
+binsize = 600 #bin size, in seconds
+nbins = 6 
+
+spikes$spike_bin = factor(spikes$SpikeT_sec %/% binsize, levels = 0:(nbins-1))
+
+spikes_binned = list()
+for (c in unique(spikes$Cell)) {
+  spikes_binned[[c]] = as.data.frame(
+    table(spikes$spike_bin[spikes$Cell==c], dnn = 'bin')
+    )
+  bl = spikes_binned[[c]]$Freq[1]
+  spikes_binned[[c]]$NrmFreq = (spikes_binned[[c]]$Freq/bl)*100
+}
+
+spikes_binned = bind_rows(spikes_binned, .id = "Cell")
+spikes_binned = left_join(
+  unique(spikes[,c('Cell','Region','HM4D')]), spikes_binned, 
+  by='Cell'
+)
+
+```
+
+
+# Define pre/post
+Baseline before drug administration was 10 minutes.
+Post used was final 10 minutes
+```{r}
+
+component = c('bl', 'void','void','void','void','post')
+spikes_binned = left_join(spikes_binned, data.frame('bin'=as.factor(0:5), component), by='bin')
+
+```
+
+
+# Calculate pre/post activity and get summary stats
+```{r}
+
+#get pre/post for each cell
+spike_summary = summarise_at(
+  .tbl = group_by(
+    .data = spikes_binned[spikes_binned$component!='void',],
+    Cell, Region, HM4D, component),
+  .funs = list(NrmFreq=~mean(.)),
+  .vars = c('NrmFreq')
+)
+
+spike_summary$group = droplevels(with(spike_summary, interaction(Region, HM4D)))
+spike_summary$group = recode_factor(
+  spike_summary$group, 
+  'vCA1.neg'='HM4D-',
+  'BLA.pos'='HM4D+: BLA',
+  'vCA1.pos'='HM4D+: vHC'
+  )
+
+#get mean summary for each pair.
+spike_summary.stats = summarise_at(
+  .tbl = group_by(
+    .data = spike_summary,
+    Region, group, component),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('NrmFreq')
+)
+
+```
+
+
+# Plots
+## Global Plot Parameters
+```{r}
+
+#set figure file prefix
+f_pfx = '10K9'
+
+#ggsave
+p.save = TRUE
+
+#Plot dimensions
+p.dim.width = 4.5 #Plot width (in)
+p.dim.height = 4.5 #Plot height (in)
+p.dim.dpi = 500 #Plot dpi
+
+#Plot text
+p.textsize.title = 20
+p.textsize.legend =10
+p.textsize.axis.title = 13
+p.textsize.axis.text = 12
+
+#Plot colors
+p.scale.colour = c("white","red3", "royalblue3")
+p.scale.fill = c("white","red3", "royalblue3")
+
+
+#Plot line dimensions
+p.line.data.size = 1
+p.line.axis.size = .5
+p.line.bar.size = .7
+p.line.error.size = .75
+
+#Widths
+p.width.bar = .8
+p.width.jitter = .3
+p.width.error = .5
+
+#Point/dot sizes
+p.point.shape = 21
+p.point.size = 4
+p.point.stroke = 1
+p.dot.size = 2.5
+p.dot.shape = 21
+p.dot.alpha = .3
+
+
+#base theme
+p.basetheme = theme_bw() + theme(
+    panel.grid = element_blank(), 
+    panel.border = element_rect(colour = "white"),
+    axis.line = element_line(color="black", linewidth = p.line.axis.size),
+    plot.title = element_text(
+      size=p.textsize.title, 
+      hjust=.5, margin=margin(b=15,t=10), 
+      face="bold"),
+    axis.title = element_text(size=p.textsize.axis.title, face="bold"),
+    axis.text= element_text(size=p.textsize.axis.text,colour="black"),
+    axis.text.x= element_text(
+      size=p.textsize.axis.title,
+      face='bold',
+      angle = -90,
+      hjust = 0,
+      vjust=.5,
+      margin=margin(b=10,t=5)),
+    legend.position = c(.3,.85),
+    legend.title = element_blank(),
+    legend.text = element_text(size=p.textsize.legend, face="bold"),
+    legend.key = element_rect(colour=NA,fill=NA),
+    legend.background = element_rect(fill=NA),
+    plot.background = element_rect(fill = "transparent",colour = NA),
+    plot.margin = p.margin1
+  ) 
+
+#predefine partial function for saving plots
+saveplot = partial(
+  ggsave,
+  width = p.dim.width,
+  height = p.dim.height,
+  units = "in",
+  dpi = p.dim.dpi,
+  bg = 'transparent'
+)
+
+```
+
+## Firing Rate plot
+```{r}
+
+#Define plot specific parameters
+p.ymin = 40
+p.ymax = 110
+p.yint = 20
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+p.spikefreq = ggplot(
+  data = spike_summary.stats,
+  aes(
+    x = component,
+    y = mean,
+    group = group,
+    fill = group
+  )
+)
+
+p.spikefreq + 
+  
+  geom_errorbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    aes(ymin = mean - sem,
+        ymax = mean + sem,
+        width = p.width.error
+        )) +
+  
+  geom_line() +
+  
+  geom_point(
+    stat = "identity",
+    size = p.point.size,
+    shape = p.point.shape,
+    stroke = p.point.stroke
+  ) +
+  
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  scale_x_discrete(labels=c('pre','post')) +
+  
+  labs(
+    y = '% Baseline Firing'
+  ) +
+  
+  p.basetheme +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(angle=0, hjust=.5),
+    legend.position = c(1.7,.2),
+    plot.margin = margin(2.4,3.75,2.45,3.75, unit='cm')
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Firing.tiff", sep = '_'))}  
+
+```
+
+
+
+
+# Stats
+
+```{r}
+
+spike.anova = ezANOVA(
+  data = spike_summary,
+  dv = NrmFreq,
+  wid = Cell,
+  within = component,
+  between = group,
+  type = 3,
+  detailed = TRUE
+)
+spike.anova
+
+spike.hm4dneg.anova = ezANOVA(
+  data = spike_summary[spike_summary$HM4D=='neg',],
+  dv = NrmFreq,
+  wid = Cell,
+  within = component,
+  type = 3,
+  detailed = TRUE
+)
+spike.hm4dneg.anova
+
+spike.hm4dpos.anova = ezANOVA(
+  data = spike_summary[spike_summary$HM4D=='pos',],
+  dv = NrmFreq,
+  wid = Cell,
+  within = component,
+  between = group,
+  type = 3,
+  detailed = TRUE
+)
+spike.hm4dpos.anova
+
+spike.hm4dbla.anova = ezANOVA(
+  data = spike_summary[spike_summary$group=='HM4D+: BLA',],
+  dv = NrmFreq,
+  wid = Cell,
+  within = component,
+  type = 3,
+  detailed = TRUE
+)
+spike.hm4dbla.anova
+
+spike.hm4dvhc.anova = ezANOVA(
+  data = spike_summary[spike_summary$group=='HM4D+: vHC',],
+  dv = NrmFreq,
+  wid = Cell,
+  within = component,
+  type = 3,
+  detailed = TRUE
+)
+spike.hm4dvhc.anova
+
+```

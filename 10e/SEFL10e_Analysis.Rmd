@@ -49,12 +49,14 @@ It was found that this high dose of anisomycin profoundly disrupted behavior dur
 We subsequently used the NoTrauma-Veh and Trauma-Veh controls to test if\
 A) This lower dose of anisomycin would effect trauma memory recall (in animals that previously received trauma and vehicle) \
 B) This lower dose would effect fear memory formation (in animals that previously received no trauma and vehicle) \
+C) This lower dose was able to block translation of cfos induced by shock \
 Although the data from the initial behavior testing is provided, the analyses are not presented here for simplicity.
 ```{r}
 
 #load 10e data 
 data_vf = read.csv('sefl10e_vfdata.csv',header=TRUE)
 groups = read.csv('sefl10e_groups.csv',header=TRUE)
+fos = read.csv('sefl10e_fosdata.csv',header=TRUE)
 
 #update group info
 groups$Group = recode_factor(groups$Group, 'NT-Veh'='NT: veh', 'T-Veh'='T: veh', 'T-Ani'='T: Ani')
@@ -62,6 +64,7 @@ groups$ExpTest2_Drug = recode_factor(groups$ExpTest2_Drug, "ANI"='ani', "Veh"='v
 groups$ExpTest2_Drug = factor(groups$ExpTest2_Drug, levels=c('veh','ani'))
 groups$AcqTest_Drug = recode_factor(groups$AcqTest_Drug, "ANI"='ani', "Veh"='veh')
 groups$AcqTest_Drug = factor(groups$AcqTest_Drug, levels=c('veh','ani'))
+fos$ANI_Dose = as.factor(fos$ANI_Dose)
 
 #add group info 
 data_vf = right_join(x=groups,y=data_vf,by="Animal")
@@ -119,6 +122,14 @@ acq.stats = summarise_at(
   .vars = c('motion','freezing')
 )
 
+#cFOS
+fos.stats = summarise_at(
+  .tbl = group_by(
+    .data = fos,
+    ANI_Dose),
+  .funs = list(mean=~mean(.), sem=~sd(.)/sqrt(n())),
+  .vars = c('Counts_PctControl')
+)
 
 ```
 
@@ -172,6 +183,7 @@ p.dot.alpha = .3
 
 #p.margin
 p.margin1 = unit(c(2, 3.25, 2.45, 3.25), "cm") 
+p.margin2 = unit(c(2, 3.75, 2.45, 3.75), "cm") 
 
 #base theme
 p.basetheme = theme_bw() + theme(
@@ -358,6 +370,76 @@ if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Expression.tiff", sep = '
 ```
 
 
+### Fos induction
+```{r}
+
+P.fos = ggplot(
+  data = fos.stats,
+  aes(x=ANI_Dose,
+      y=mean,
+      fill=ANI_Dose,
+      group=ANI_Dose))
+
+#Define plot specific parameters
+p.ymin = 0
+p.ymax = 160
+p.yint = 20
+p.breaks = seq(p.ymin,p.ymax,p.yint)
+
+#Create plot
+P.fos  +
+  
+  geom_crossbar(
+    stat="identity",
+    size=p.line.error.size,
+    colour = "black",
+    show.legend = FALSE,
+    aes(ymin = mean - sem,
+        ymax = mean + sem,
+        #width = p.width.error
+        )) +
+  
+  geom_jitter(
+    data = fos,
+    aes(x=ANI_Dose,
+        y=Counts_PctControl),
+    width = p.width.bar* p.width.jitter,
+    height = 0,
+    shape = p.dot.shape,
+    size = p.dot.size,
+    colour = 'black',
+    fill=NA,
+    alpha = p.dot.alpha,
+    show.legend=FALSE
+  ) +
+  
+  scale_fill_manual(values=p.scale.colour) +
+  coord_cartesian(ylim=c(p.ymin,p.ymax)) +
+  scale_y_continuous(breaks=p.breaks, expand = c(0, 0)) +
+  scale_x_discrete(labels=c('veh','ani')) +
+  
+  labs(
+    y = "cFos (% veh)"
+  ) +
+  
+  p.basetheme +
+  theme(
+    plot.title = element_text(margin=margin(b=25,t=5)),
+    axis.title.x = element_blank(),
+    axis.text.x= element_text(
+      size=p.textsize.axis.title,
+      #face='plain',
+      angle = 0,
+      vjust=.5,
+      hjust=.5),
+    legend.position = c(.23,.9),
+    plot.margin = p.margin2
+  )
+
+if (p.save == TRUE) {saveplot(filename = paste(f_pfx, "Fos.tiff", sep = '_'))}
+
+```
+
 
 # Stats
 
@@ -372,7 +454,7 @@ exptest.anova = ezANOVA(
   between = ExpTest2_Drug,
   white.adjust = TRUE,
   type = 3,
-  return_aov = TRUE,
+  return_aov = FALSE,
   detailed = TRUE
 )
 exptest.anova
@@ -422,6 +504,24 @@ acq.test.anova
 
 ```
 
+
+
+## fos
+```{r}
+
+fos.anova = ezANOVA(
+  data = fos,
+  wid = Animal,
+  dv = Counts_PctControl,
+  between = ANI_Dose,
+  white.adjust = TRUE,
+  type = 3,
+  return_aov = FALSE,
+  detailed = TRUE
+)
+fos.anova
+
+```
 
 
 
